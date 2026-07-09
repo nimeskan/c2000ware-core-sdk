@@ -61,7 +61,7 @@ service — even though we only need CLI build/import functionality and have
 no physical hardware debug probe attached. In a minimal container without
 udev, this step fails and aborts the whole installation.
 
-Two things fix it:
+Three things fix it:
 
 ```bash
 # 1. udev has nowhere to put its rules file — give it a directory
@@ -74,12 +74,31 @@ cat > /etc/init.d/udev <<'EOF'
 exit 0
 EOF
 chmod +x /etc/init.d/udev
+
+# 3. Belt-and-suspenders: shim the "service" command itself, in case anything
+#    calls "service udev ..." directly instead of resolving via /etc/init.d.
+#    Falls through to the real /usr/sbin/service for every other service name.
+mkdir -p /root/.local/bin
+cat > /root/.local/bin/service <<'EOF'
+#!/bin/sh
+if [ "$1" = "udev" ]; then
+  exit 0
+fi
+exec /usr/sbin/service "$@"
+EOF
+chmod +x /root/.local/bin/service
+# Make sure /root/.local/bin is early in PATH so this shim is found first:
+export PATH="/root/.local/bin:$PATH"
 ```
 
-This only affects the driver-installation post-step; it has no effect on
-compiling or building projects. If you have a real debug probe and intend
-to flash/debug from this machine, install on a host with a working udev
-instead.
+Step 2 (the `/etc/init.d/udev` stub) is what actually made the install
+succeed here; step 3 is a defensive fallback in case some other installer
+path calls `service` directly rather than going through `/etc/init.d`. It's
+harmless to include and costs nothing, so we keep both.
+
+None of this affects compiling or building projects. If you have a real
+debug probe and intend to flash/debug from this machine, install on a host
+with a working udev instead.
 
 ---
 

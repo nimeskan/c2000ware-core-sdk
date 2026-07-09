@@ -1,0 +1,11 @@
+[
+    {
+    "metadataVersion": "3.0.0",
+    "id" : "C2000WARE",
+    "name" : "C2000WARE",
+    "version" : "26.01.00.00",
+    "type" : "software",
+    "description": "C2000Ware SDK",
+    "allowPartialDownload": "false"
+    }
+]

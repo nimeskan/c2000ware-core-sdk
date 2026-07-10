@@ -294,7 +294,13 @@ exports = {
     ],
     references: references.componentReferences,
     alwaysPresent: alwaysPresent,
-    templates: [{
+    templates: [
+        {
+            name: "/driverlib/migration.json.xdt",
+            outputPath: "migration.json",
+            alwaysRun: true
+        },
+        {
             name: "/driverlib/board.c.xdt",
             outputPath: "board.c",
             alwaysRun: true

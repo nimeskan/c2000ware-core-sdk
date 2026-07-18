@@ -83,43 +83,89 @@ timeout expecting it to resolve itself.
 
 ### Step 2 -- Enumerate the EPWM instances
 
-Call `getModuleInstances` filtered to the EPWM module (and the shared sync
-module, if the server's driverlib metadata exposes device-level sync
-routing as its own module rather than folding it into each EPWM instance).
-Record every EPWM instance's `moduleInstanceId`, and note any
-`parentInstances`/`childInstances` relationships reported -- a shared
-static sync-routing instance parented under all the EPWM instances is a
-sign the device does its cross-peripheral sync-source selection at the
-device level, not per-EPWM-instance, and Step 4 needs to check that
-separately from each EPWM instance's own settings.
+Call `getModuleInstances` with `moduleIds: ["/driverlib/epwm.js", "/driverlib/sync.js"]`
+-- these are the two concrete, live-verified module ids: `/driverlib/epwm.js`
+is every EPWM peripheral instance, `/driverlib/sync.js` is the device-level
+sync-routing module (a single shared `$static` instance, not per-EPWM).
+Record every EPWM instance's `moduleInstanceId` (typically `myEPWM1`,
+`myEPWM2`, ... but read the actual ids returned, don't assume the naming).
+Note any `parentInstances`/`childInstances` relationships reported -- the
+`/driverlib/sync.js` instance being present at all, parented under
+`/driverlib/epwm.js`'s `$static` instance, is itself the signal that this
+device does some of its cross-peripheral sync-source selection at the
+device level rather than per-EPWM-instance, which is what Step 4 checks.
 
 ### Step 3 -- Pull time-base and sync settings for every EPWM instance
 
-Call `getInstanceConfiguration` **once**, passing all EPWM instances found
-in Step 2 in the `instances` array, filtered with `ids` down to just the
-time-base and sync-relevant configurables so the response stays small.
-Based on a live-verified EPWM instance, that configurable set includes (id
-prefixes will match, but confirm exact spelling against the live
-`getInstanceConfiguration` response for the actual server/device rather
-than assuming these are complete):
+Call `getInstanceConfiguration` **once**, `moduleId: "/driverlib/epwm.js"`,
+passing all EPWM instances found in Step 2 in the `instances` array, with
+`ids` set to this exact, live-verified list:
 
-- Time-base: period, clock divider(s), counter mode, counter initial value,
-  and how the period register loads (direct vs. shadow, and on what event)
-- Sync: sync-in pulse source, sync-out pulse mode, phase-shift enable,
-  force-sync-pulse, one-shot-sync-out trigger
+```
+[
+  "epwmTimebase_period",
+  "epwmTimebase_clockDiv",
+  "epwmTimebase_hsClockDiv",
+  "epwmTimebase_counterMode",
+  "epwmTimebase_counterValue",
+  "epwmTimebase_periodLoadMode",
+  "epwmTimebase_periodLoadEvent",
+  "epwmTimebase_periodLink",
+  "epwmTimebase_periodGld",
+  "epwmTimebase_phaseEnable",
+  "epwmTimebase_phaseShift",
+  "epwmTimebase_forceSyncPulse",
+  "epwmTimebase_syncInPulseSource",
+  "epwmTimebase_syncOutPulseMode",
+  "epwmTimebase_oneShotSyncOutTrigger"
+]
+```
+
+Set `includeDescriptions: false` -- these ids are unambiguous enough that
+descriptions just cost tokens for no benefit here.
+
+**Important quirk confirmed by a live capture:** `epwmTimebase_phaseShift`
+is a *conditional* configurable -- SysConfig only reports it for an
+instance when that same instance's `epwmTimebase_phaseEnable` is `true`.
+On an instance where phase-shift is disabled, `epwmTimebase_phaseShift`
+will simply be **absent** from that instance's returned configuration --
+that's expected, not a wrong id or a bug. Don't substitute a guessed id
+(e.g. `epwmTimebase_phase`) if you don't see a phase value; it silently
+returns nothing for an unrecognized id, which looks identical to "not
+applicable" unless you know to expect that. If you need the phase value
+for an instance that has `phaseEnable: true` and it didn't come back
+(e.g. because this id list changes on a future SysConfig version), re-query
+just that instance with `searchText: "phase"` rather than assuming it
+doesn't exist.
 
 Do this as a single call across all instances rather than one call per
 instance -- it's cheaper and makes the values directly comparable.
 
 ### Step 4 -- Check device-level sync routing, if applicable
 
-If Step 2 revealed a separate shared sync-routing instance (rather than
-each EPWM instance selecting its own sync-in source independently), call
-`getInstanceConfiguration` on that instance with `searchText: "sync"`
-instead of a hardcoded `ids` list -- the exact configurable names for
-device-level sync crossbar routing vary by device family (how many
-peripherals can be a sync source/destination differs device to device), so
-searching is more robust than assuming fixed IDs.
+If Step 2 revealed a separate shared sync-routing instance, it will be
+`moduleId: "/driverlib/sync.js"`, typically instance id `$static`. Call
+`getInstanceConfiguration` on it with `searchText: "sync"` rather than a
+hardcoded `ids` list -- **the configurable set here varies by device
+family**, confirmed directly in this SDK's `driverlib/.meta/sync.js`:
+
+- Every device family exposes at least `syncOutSource` (which peripheral's
+  sync-out drives the external `EXTSYNCOUT` pin) and `syncOutLock` (a lock
+  bit guarding that source selection) -- these two are safe to expect
+  everywhere.
+- Some families (confirmed for F2837xD/F2837xS/F2807x/F28004x in this SDK)
+  add per-peripheral device-level sync-in routing configurables named
+  `epwm<N>SyncInSource` and `ecap<N>SyncInSource` for specific instance
+  numbers -- e.g. `epwm4SyncInSource`, `ecap1SyncInSource`. These do not
+  exist on every family, and which instance numbers get one depends on the
+  device, which is exactly why this step searches instead of assuming a
+  fixed list.
+
+Whatever comes back, read it for one thing: does it corroborate which EPWM
+instance is the true sync root (i.e. is that same instance's sync-out also
+the one selected as `syncOutSource`)? That cross-check is what makes Step 5
+reliable instead of just trusting each instance's own settings in
+isolation.
 
 ### Step 5 -- Reconstruct the sync chain
 
@@ -149,10 +195,18 @@ does vary by device is how many separate MCPWM instances the target device
 has. To determine that for the target device:
 
 - If a `.syscfg` file already targeting the target device is open (or can
-  be opened) in the workspace, use `getModuleInstances` filtered to the
-  MCPWM module to see what's already present, and `addModuleInstances`
-  (repeating the MCPWM module ID) to discover how many instances the
-  device supports -- it will fail once you exceed the hardware count.
+  be opened) in the workspace, call `getModuleInstances` with
+  `moduleIds: ["/driverlib/mcpwm.js"]` (the concrete MCPWM module id) to
+  see what's already present, then `addModuleInstances` with
+  `moduleIds: ["/driverlib/mcpwm.js"]` repeated once per extra instance you
+  want to test, and `maxConfigurables: 0` (skip the representative-config
+  payload -- you only care whether the add succeeds) to discover how many
+  the device supports. It will return an error instead of an added instance
+  once you exceed the hardware count.
+  **Do not call `save` during this probe** -- added test instances stay
+  in-memory only and are discarded once the MCP client disconnects; calling
+  `save` would actually write them into that file, which is a real,
+  user-visible change to a project you were only supposed to be inspecting.
 - If no such file exists yet, note this as a gap in the report rather than
   guessing a pair/instance count -- the target device's data sheet or TRM
   is the authoritative source, and this skill's job is the EPWM-side
@@ -160,34 +214,78 @@ has. To determine that for the target device:
 
 ### Step 7 -- Produce the report
 
-Output a single settings table, one row per **source EPWM instance**, plus
-a short prose summary above it. Do not include any guidance on the
-mechanics of creating the target `.syscfg` file, calling
-`addModuleInstances`/`changeConfiguration` for MCPWM, or naming target
-instances -- that is explicitly out of scope for this skill's output.
+Do not include any guidance on the mechanics of creating the target
+`.syscfg` file, calling `addModuleInstances`/`changeConfiguration` for
+MCPWM, or naming target instances -- that is explicitly out of scope for
+this skill's output. The report is the deliverable; use exactly this
+structure and section order so nothing gets left out:
 
-**Table columns:**
+**1. Sync topology.** One sentence naming the sync root (which EPWM
+instance, and how you know -- e.g. it's the one selected in the
+device-level `syncOutSource` from Step 4), then one line per other
+instance: which upstream instance's sync-out feeds it, and in what pulse
+mode. If any instance has no sync relationship to the rest at all, name it
+here explicitly as independent.
+
+**2. Time-base compatibility.** State plainly whether all instances in the
+sync chain share the same period, clock divider(s), and counter mode --
+these three matching is the hard requirement for sharing an MCPWM counter.
+Call out any instance that doesn't match and on which field, since that
+instance can't join the others on one MCPWM counter regardless of its sync
+relationship.
+
+**3. Target capacity check.** State the result of Step 6 in numbers: how
+many MCPWM instances (at 3 pairs each) the source's EPWM instances would
+require, and whether the target device was confirmed (or not) to have that
+many available.
+
+**4. Per-instance settings table.** One row per **source EPWM instance**:
 
 | Column | Content |
 |---|---|
 | EPWM instance | `moduleInstanceId` from Step 2 |
 | Period | value from Step 3 |
-| Clock divider(s) | value(s) from Step 3 |
+| Clock divider(s) | value(s) from Step 3 (`epwmTimebase_clockDiv` / `epwmTimebase_hsClockDiv`) |
 | Counter mode | value from Step 3 |
-| Period load mode | value from Step 3 |
-| Sync-in source | value from Step 3 (resolved to which instance/external signal it names) |
+| Period load mode / event | values from Step 3 (`epwmTimebase_periodLoadMode` / `epwmTimebase_periodLoadEvent`) |
+| Sync-in source | value from Step 3, resolved to which instance/external signal it names |
 | Sync-out mode | value from Step 3 |
-| Phase-shift enable / value | value from Step 3, and whether the effective offset is zero or non-zero |
+| Phase-shift enable / value | `epwmTimebase_phaseEnable`, and `epwmTimebase_phaseShift` when present (state the offset both as a raw count and as a percentage of that instance's period, e.g. "300 / 2000 = 15%") |
 | One-shot sync-out trigger | value from Step 3 |
-| Sync role | Root / Synced (from `<X>`) / Independent, per Step 5 |
+| Sync role | Root / Synced (from `<X>`) / Independent, per section 1 |
 | Consolidation candidate? | Yes, with which sibling instances, if period + clock divider + counter mode all match and it's part of the same sync chain; No, with the specific mismatching field(s) named, otherwise |
 
-**Prose summary above the table** should state in plain terms: how many
-independent time-base groups exist among the source EPWM instances, how
-many MCPWM instances (at 3 pairs each) that would require on the target
-device, whether Step 6 confirmed the target device actually has that many,
-and which EPWM instances (if any) cannot be consolidated with any other and
-why.
+**5. Proposed grouping and open flags.** This is the section that turns
+sections 1-4 into something actionable, so don't skip it or leave it
+implicit in the table:
+
+- Partition the consolidation candidates into groups of at most 3 (one
+  MCPWM instance's pair capacity per group), stating which EPWM instances
+  land in which group.
+- For every relationship that crosses a group boundary (i.e. two EPWM
+  instances that are sync-linked in the source but end up assigned to
+  *different* MCPWM instances), flag it explicitly by name -- that
+  relationship can no longer ride a shared counter and would need an
+  inter-MCPWM-instance sync link instead. Don't let this fall out silently
+  just because the grouping made it necessary.
+- For every non-zero phase-shift value inside a group that does share one
+  MCPWM instance, flag by name that it needs to be re-expressed via
+  counter-compare rather than an independent counter, since the group's
+  pairs all share one `TBCTR`.
+
+### Step 8 -- Stop and confirm before going further
+
+**End your turn after presenting the report.** Do not, in the same turn or
+without being asked, proceed to open the target device's `.syscfg`, add or
+configure any MCPWM instance, or start writing conversion code -- even
+though the report may make the next step look obvious. Ask the user to
+review the grouping and flagged relationships in section 5 specifically,
+since that's where a judgment call was made (how to partition instances
+into groups of <=3) that the user may want to override -- e.g. a different
+grouping that keeps a different set of instances together, or a decision
+about how to handle a flagged cross-group sync relationship. Only continue
+into any follow-on configuration work once the user explicitly confirms the
+report and says to proceed.
 
 ## Reference material in this repository
 

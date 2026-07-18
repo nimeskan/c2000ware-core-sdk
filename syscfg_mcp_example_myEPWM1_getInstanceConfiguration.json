@@ -1,0 +1,1822 @@
+{
+  "configuration": [
+    {
+      "moduleId": "/driverlib/epwm.js",
+      "moduleInstanceId": "myEPWM1",
+      "configuration": [
+        {
+          "id": "$name",
+          "name": "Name",
+          "value": "myEPWM1"
+        },
+        {
+          "id": "epwmMemoryFileBrowse",
+          "name": "EPWM Memory File",
+          "value": ""
+        },
+        {
+          "id": "epwmLoadAllValues",
+          "name": "Overwrite All Values From Memory File",
+          "value": false,
+          "description": "Loads in all values from memory, overwriting current settings."
+        },
+        {
+          "id": "epwmLoadConfig",
+          "name": "Load Configuration",
+          "description": "Load the configuration from the selected .dat file into Sysconfig."
+        },
+        {
+          "id": "copyUse",
+          "name": "Use Copy Feature",
+          "value": false,
+          "description": ""
+        },
+        {
+          "id": "epwmLock",
+          "name": "EPWM Lock Register",
+          "value": [],
+          "choices": [
+            "Global load register group",
+            "Trip zone register group",
+            "Trip zone clear group",
+            "Digital compare group"
+          ],
+          "description": "Lock EPWM registers"
+        },
+        {
+          "id": "generateCodeTemplate",
+          "name": "Generate Code Template",
+          "value": false,
+          "description": "Enable the template code generation"
+        },
+        {
+          "id": "codeTemplateName",
+          "name": "Code Template Name",
+          "value": "ePWMConfigurationTemplate",
+          "description": "The name of the code template generated for this EPWM configuration"
+        },
+        {
+          "id": "epwmGlobalLoad_gld",
+          "name": "Enable Global Shadow to Active Load",
+          "value": false,
+          "description": "all the shadow to active reload events are defined by GLDMODE bits in GLDCTL register"
+        },
+        {
+          "id": "epwmTimebase_emulationMode",
+          "name": "Emulation Mode",
+          "value": "Stop after next Time Base counter increment or decrement",
+          "choices": [
+            "Stop after next Time Base counter increment or decrement",
+            "Stop when counter completes whole cycle",
+            "Free run"
+          ],
+          "description": "Behavior of the ePWM time-base counter during emulation events"
+        },
+        {
+          "id": "epwmTimebase_clockDiv",
+          "name": "Time Base Clock Divider",
+          "value": "Divide clock by 8",
+          "choices": [
+            "Divide clock by 1",
+            "Divide clock by 2",
+            "Divide clock by 4",
+            "Divide clock by 8",
+            "Divide clock by 16",
+            "Divide clock by 32",
+            "Divide clock by 64",
+            "Divide clock by 128"
+          ],
+          "description": "CLKDIV: These bits select the time base clock pre-scale value, TBCLK = EPWMCLK/(HSPCLKDIV*CLKDIV)",
+          "infos": [
+            "For perfectly synchronized TBCLKs across multiple EPWM modules, the prescaler bits in the TBCTL register of each EPWM module must be set identically"
+          ]
+        },
+        {
+          "id": "epwmTimebase_hsClockDiv",
+          "name": "High Speed Clock Divider",
+          "value": "Divide clock by 1",
+          "choices": [
+            "Divide clock by 1",
+            "Divide clock by 2",
+            "Divide clock by 4",
+            "Divide clock by 6",
+            "Divide clock by 8",
+            "Divide clock by 10",
+            "Divide clock by 12",
+            "Divide clock by 14"
+          ],
+          "description": "HSPCLKDIV: These bits determine part of the time-base clock pre-scale value, TBCLK = EPWMCLK/(HSPCLKDIV*CLKDIV)"
+        },
+        {
+          "id": "epwmTimebase_periodLoadMode",
+          "name": "Time Base Period Load Mode",
+          "value": "PWM Period register access is through shadow register",
+          "choices": [
+            "PWM Period register access is through shadow register",
+            "PWM Period register access is directly"
+          ],
+          "description": "Period load mode for the Time Base Counter Submodule"
+        },
+        {
+          "id": "epwmTimebase_periodLoadEvent",
+          "name": "Time Base Period Load Event",
+          "value": "Shadow to active load occurs when time base counter reaches 0",
+          "choices": [
+            "Shadow to active load occurs when time base counter reaches 0",
+            "Shadow to active load occurs when time base counter reaches 0 and a SYNC occurs",
+            "Shadow to active load occurs only when a SYNC occurs"
+          ],
+          "description": "Period load event for the Time Base Counter Submodule"
+        },
+        {
+          "id": "epwmTimebase_period",
+          "name": "Time Base Period",
+          "value": 2000,
+          "description": "Period for the Time Base Counter Submodule"
+        },
+        {
+          "id": "epwmTimebase_periodLink",
+          "name": "Time Base Period Link",
+          "value": "Disable Linking",
+          "choices": [
+            "Disable Linking",
+            "link current ePWM with ePWM1",
+            "link current ePWM with ePWM2",
+            "link current ePWM with ePWM3",
+            "link current ePWM with ePWM4",
+            "link current ePWM with ePWM5",
+            "link current ePWM with ePWM6",
+            "link current ePWM with ePWM7"
+          ],
+          "description": "Simultaneous write to the current ePWM module PRD register"
+        },
+        {
+          "id": "epwmTimebase_periodGld",
+          "name": "Enable Time Base Period Global Load",
+          "value": false,
+          "description": "Use global load configuration for PRD"
+        },
+        {
+          "id": "epwmTimebase_counterValue",
+          "name": "Initial Counter Value",
+          "value": 0,
+          "description": "Initial Counter value for the Time Base Counter Submodule"
+        },
+        {
+          "id": "epwmTimebase_counterMode",
+          "name": "Counter Mode",
+          "value": "Up - count mode",
+          "choices": [
+            "Up - count mode",
+            "Down - count mode",
+            "Up - down - count mode",
+            "Stop - Freeze counter"
+          ],
+          "description": "Mode of the Counter value for the Time Base Counter Submodule"
+        },
+        {
+          "id": "epwmTimebase_phaseEnable",
+          "name": "Enable Phase Shift Load",
+          "value": false,
+          "description": "Enable phase shift load for the Time Base Counter Submodule"
+        },
+        {
+          "id": "epwmTimebase_forceSyncPulse",
+          "name": "Force a Sync Pulse",
+          "value": false,
+          "description": "Force a sync pulse for the Time Base Counter Submodule"
+        },
+        {
+          "id": "epwmTimebase_syncInPulseSource",
+          "name": "Sync In Pulse Source",
+          "value": "Sync-in source is EPWM1 sync-out signal",
+          "choices": [
+            "Disable Sync-in",
+            "Sync-in source is EPWM1 sync-out signal",
+            "Sync-in source is EPWM2 sync-out signal",
+            "Sync-in source is EPWM3 sync-out signal",
+            "Sync-in source is EPWM4 sync-out signal",
+            "Sync-in source is EPWM5 sync-out signal",
+            "Sync-in source is EPWM6 sync-out signal",
+            "Sync-in source is EPWM7 sync-out signal",
+            "Sync-in source is ECAP1 sync-out signal",
+            "Sync-in source is ECAP2 sync-out signal",
+            "Sync-in source is ECAP3 sync-out signal",
+            "Sync-in source is Input XBAR out5 signal",
+            "Sync-in source is Input XBAR out6 signal"
+          ],
+          "description": "Sync in Pulse for the Time Base Counter Submodule"
+        },
+        {
+          "id": "epwmTimebase_syncOutPulseMode",
+          "name": "Sync Out Pulse",
+          "value": [
+            "Counter zero event generates EPWM sync-out pulse"
+          ],
+          "choices": [
+            "Software force generated EPWM sync-out pulse",
+            "Counter zero event generates EPWM sync-out pulse",
+            "Counter equal to CMPB event generates EPWM sync-out pulse",
+            "Counter equal to CMPC event generates EPWM sync-out pulse",
+            "Counter equal to CMPD event generates EPWM sync-out pulse",
+            "DCA Event 1 Sync signal generates EPWM sync-out pulse",
+            "DCB Event 1 Sync signal generates EPWM sync-out pulse",
+            "Enable all the above sources"
+          ],
+          "description": "Sync Out Pulse for the Time Base Counter Submodule"
+        },
+        {
+          "id": "epwmTimebase_oneShotSyncOutTrigger",
+          "name": "One-Shot Sync Out Trigger",
+          "value": "Trigger is OSHT sync",
+          "choices": [
+            "Trigger is OSHT sync",
+            "Trigger is OSHT reload"
+          ],
+          "description": "One-Shot Sync Out Trigger for the Time Base Counter Submodule"
+        },
+        {
+          "id": "hrpwm_syncSource",
+          "name": "EPWMxSYNCPER Source Select",
+          "value": "Counter equals Period",
+          "choices": [
+            "Counter equals Period",
+            "Counter equals zero",
+            "Counter equals COMPC when counting up",
+            "Counter equals COMPC when counting down",
+            "Counter equals COMPD when counting up",
+            "Counter equals COMPD when counting down"
+          ],
+          "description": "Selects the source of the EPWMSYNCPER signal that goes to the CMPSS and GPDAC"
+        },
+        {
+          "id": "epwmCounterCompare_cmpA",
+          "name": "Counter Compare A (CMPA)",
+          "value": 1000,
+          "description": "Counter Compare A (CMPA) value"
+        },
+        {
+          "id": "epwmCounterCompare_cmpAGld",
+          "name": "Enable Counter Compare A (CMPA) Global Load",
+          "value": false,
+          "description": "Use global load configuration for CMPA"
+        },
+        {
+          "id": "epwmCounterCompare_enableShadowLoadModeCMPA",
+          "name": "Enable Shadow Counter Compare A (CMPA)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare A (CMPA) value"
+        },
+        {
+          "id": "epwmCounterCompare_shadowLoadModeCMPA",
+          "name": "Counter Compare A Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load",
+            "Load on sync or when counter equals zero",
+            "Load on sync or when counter equals period",
+            "Load on sync or when counter equals zero or period",
+            "Load on sync only"
+          ],
+          "description": "Counter Compare A Shadow Load Event"
+        },
+        {
+          "id": "epwmCounterCompare_cmpALink",
+          "name": "Counter Compare A (CMPA) Link",
+          "value": "Disable Linking",
+          "choices": [
+            "Disable Linking",
+            "link current ePWM with ePWM1",
+            "link current ePWM with ePWM2",
+            "link current ePWM with ePWM3",
+            "link current ePWM with ePWM4",
+            "link current ePWM with ePWM5",
+            "link current ePWM with ePWM6",
+            "link current ePWM with ePWM7"
+          ],
+          "description": "Simultaneous write to the current ePWM module CMPA register"
+        },
+        {
+          "id": "epwmCounterCompare_cmpB",
+          "name": "Counter Compare B (CMPB)",
+          "value": 500,
+          "description": "Counter Compare B (CMPB) value"
+        },
+        {
+          "id": "epwmCounterCompare_cmpBGld",
+          "name": "Enable Counter Compare B (CMPB) Global Load",
+          "value": false,
+          "description": "Use global load configuration for CMPB"
+        },
+        {
+          "id": "epwmCounterCompare_enableShadowLoadModeCMPB",
+          "name": "Enable Shadow Counter Compare B (CMPB)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare B (CMPB) value"
+        },
+        {
+          "id": "epwmCounterCompare_shadowLoadModeCMPB",
+          "name": "Counter Compare B Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load",
+            "Load on sync or when counter equals zero",
+            "Load on sync or when counter equals period",
+            "Load on sync or when counter equals zero or period",
+            "Load on sync only"
+          ],
+          "description": "Counter Compare B Shadow Load Event"
+        },
+        {
+          "id": "epwmCounterCompare_cmpBLink",
+          "name": "Counter Compare B (CMPB) Link",
+          "value": "Disable Linking",
+          "choices": [
+            "Disable Linking",
+            "link current ePWM with ePWM1",
+            "link current ePWM with ePWM2",
+            "link current ePWM with ePWM3",
+            "link current ePWM with ePWM4",
+            "link current ePWM with ePWM5",
+            "link current ePWM with ePWM6",
+            "link current ePWM with ePWM7"
+          ],
+          "description": "Simultaneous write to the current ePWM module CMPB register"
+        },
+        {
+          "id": "epwmCounterCompare_cmpC",
+          "name": "Counter Compare C (CMPC)",
+          "value": 0,
+          "description": "Counter Compare C (CMPC) value"
+        },
+        {
+          "id": "epwmCounterCompare_cmpCGld",
+          "name": "Enable Counter Compare C (CMPC) Global Load",
+          "value": false,
+          "description": "Use global load configuration for CMPC"
+        },
+        {
+          "id": "epwmCounterCompare_enableShadowLoadModeCMPC",
+          "name": "Enable Shadow Counter Compare C (CMPC)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare C (CMPC) value"
+        },
+        {
+          "id": "epwmCounterCompare_shadowLoadModeCMPC",
+          "name": "Counter Compare C Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load",
+            "Load on sync or when counter equals zero",
+            "Load on sync or when counter equals period",
+            "Load on sync or when counter equals zero or period",
+            "Load on sync only"
+          ],
+          "description": "Counter Compare C Shadow Load Event"
+        },
+        {
+          "id": "epwmCounterCompare_cmpCLink",
+          "name": "Counter Compare C (CMPC) Link",
+          "value": "Disable Linking",
+          "choices": [
+            "Disable Linking",
+            "link current ePWM with ePWM1",
+            "link current ePWM with ePWM2",
+            "link current ePWM with ePWM3",
+            "link current ePWM with ePWM4",
+            "link current ePWM with ePWM5",
+            "link current ePWM with ePWM6",
+            "link current ePWM with ePWM7"
+          ],
+          "description": "Simultaneous write to the current ePWM module CMPC register"
+        },
+        {
+          "id": "epwmCounterCompare_cmpD",
+          "name": "Counter Compare D (CMPD)",
+          "value": 0,
+          "description": "Counter Compare D (CMPD) value"
+        },
+        {
+          "id": "epwmCounterCompare_cmpDGld",
+          "name": "Enable Counter Compare D (CMPD) Global Load",
+          "value": false,
+          "description": "Use global load configuration for CMPD"
+        },
+        {
+          "id": "epwmCounterCompare_enableShadowLoadModeCMPD",
+          "name": "Enable Shadow Counter Compare D (CMPD)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare D (CMPD) value"
+        },
+        {
+          "id": "epwmCounterCompare_shadowLoadModeCMPD",
+          "name": "Counter Compare D Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load",
+            "Load on sync or when counter equals zero",
+            "Load on sync or when counter equals period",
+            "Load on sync or when counter equals zero or period",
+            "Load on sync only"
+          ],
+          "description": "Counter Compare D Shadow Load Event"
+        },
+        {
+          "id": "epwmCounterCompare_cmpDLink",
+          "name": "Counter Compare D (CMPD) Link",
+          "value": "Disable Linking",
+          "choices": [
+            "Disable Linking",
+            "link current ePWM with ePWM1",
+            "link current ePWM with ePWM2",
+            "link current ePWM with ePWM3",
+            "link current ePWM with ePWM4",
+            "link current ePWM with ePWM5",
+            "link current ePWM with ePWM6",
+            "link current ePWM with ePWM7"
+          ],
+          "description": "Simultaneous write to the current ePWM module CMPD register"
+        },
+        {
+          "id": "epwmActionQualifier_continousSwForceReloadModeGld",
+          "name": "Enable Continuous SW Force Global Load",
+          "value": false,
+          "description": "Use global load configuration for AQCSFRC"
+        },
+        {
+          "id": "epwmActionQualifier_continousSwForceReloadMode",
+          "name": "Continuous SW Force Shadow Mode",
+          "value": "Shadow mode load when counter equals zero",
+          "choices": [
+            "Shadow mode load when counter equals zero",
+            "Shadow mode load when counter equals period",
+            "Shadow mode load when counter equals zero or period",
+            "No shadow load mode. Immediate mode only."
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_t1Source",
+          "name": "T1 Trigger Source",
+          "value": "Digital compare event A 1",
+          "choices": [
+            "Digital compare event A 1",
+            "Digital compare event A 2",
+            "Digital compare event B 1",
+            "Digital compare event B 2",
+            "Trip zone 1",
+            "Trip zone 2",
+            "Trip zone 3",
+            "ePWM sync",
+            "Digital compare filter event"
+          ],
+          "description": "",
+          "infos": [
+            "T1/T2 selection and configuration of a trip/digital-compare event is indpendent of the configuration of that event in the Trip-Zone submodule"
+          ]
+        },
+        {
+          "id": "epwmActionQualifier_t2Source",
+          "name": "T2 Trigger Source",
+          "value": "Digital compare event A 1",
+          "choices": [
+            "Digital compare event A 1",
+            "Digital compare event A 2",
+            "Digital compare event B 1",
+            "Digital compare event B 2",
+            "Trip zone 1",
+            "Trip zone 2",
+            "Trip zone 3",
+            "ePWM sync",
+            "Digital compare filter event"
+          ],
+          "description": "",
+          "infos": [
+            "T1/T2 selection and configuration of a trip/digital-compare event is indpendent of the configuration of that event in the Trip-Zone submodule"
+          ]
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_gld",
+          "name": "ePWMxA Global Load Enable",
+          "value": false,
+          "description": "Use global load configuration for ePWMxA "
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_shadowMode",
+          "name": "ePWMxA Shadow Mode Enable",
+          "value": false,
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_onetimeSwForceAction",
+          "name": "ePWMxA One-Time SW Force Action",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_continuousSwForceAction",
+          "name": "ePWMxA Continuous SW Force Action",
+          "value": "Software forcing disabled",
+          "choices": [
+            "Software forcing disabled",
+            "Set output pins to low",
+            "Set output pins to High"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_ON_TIMEBASE_ZERO",
+          "name": "ePWMxA  Time base counter equals zero",
+          "value": "Set output pins to High",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_ON_TIMEBASE_PERIOD",
+          "name": "ePWMxA  Time base counter equals period",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_ON_TIMEBASE_UP_CMPA",
+          "name": "ePWMxA  Time base counter up equals COMPA",
+          "value": "Set output pins to low",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_ON_TIMEBASE_DOWN_CMPA",
+          "name": "ePWMxA  Time base counter down equals COMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_ON_TIMEBASE_UP_CMPB",
+          "name": "ePWMxA  Time base counter up equals COMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_ON_TIMEBASE_DOWN_CMPB",
+          "name": "ePWMxA  Time base counter down equals COMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_ON_T1_COUNT_UP",
+          "name": "ePWMxA  T1 event on count up",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_ON_T1_COUNT_DOWN",
+          "name": "ePWMxA  T1 event on count down",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_ON_T2_COUNT_UP",
+          "name": "ePWMxA  T2 event on count up",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_A_ON_T2_COUNT_DOWN",
+          "name": "ePWMxA  T2 event on count down",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_gld",
+          "name": "ePWMxB Global Load Enable",
+          "value": false,
+          "description": "Use global load configuration for ePWMxB "
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_shadowMode",
+          "name": "ePWMxB Shadow Mode Enable",
+          "value": false,
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_onetimeSwForceAction",
+          "name": "ePWMxB One-Time SW Force Action",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_continuousSwForceAction",
+          "name": "ePWMxB Continuous SW Force Action",
+          "value": "Software forcing disabled",
+          "choices": [
+            "Software forcing disabled",
+            "Set output pins to low",
+            "Set output pins to High"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_ON_TIMEBASE_ZERO",
+          "name": "ePWMxB  Time base counter equals zero",
+          "value": "Set output pins to High",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_ON_TIMEBASE_PERIOD",
+          "name": "ePWMxB  Time base counter equals period",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_ON_TIMEBASE_UP_CMPA",
+          "name": "ePWMxB  Time base counter up equals COMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_ON_TIMEBASE_DOWN_CMPA",
+          "name": "ePWMxB  Time base counter down equals COMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_ON_TIMEBASE_UP_CMPB",
+          "name": "ePWMxB  Time base counter up equals COMPB",
+          "value": "Set output pins to low",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_ON_TIMEBASE_DOWN_CMPB",
+          "name": "ePWMxB  Time base counter down equals COMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_ON_T1_COUNT_UP",
+          "name": "ePWMxB  T1 event on count up",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_ON_T1_COUNT_DOWN",
+          "name": "ePWMxB  T1 event on count down",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_ON_T2_COUNT_UP",
+          "name": "ePWMxB  T2 event on count up",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "epwmActionQualifier_EPWM_AQ_OUTPUT_B_ON_T2_COUNT_DOWN",
+          "name": "ePWMxB  T2 event on count down",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "AH",
+          "name": "Active High",
+          "description": ""
+        },
+        {
+          "id": "AL",
+          "name": "Active Low",
+          "description": ""
+        },
+        {
+          "id": "AHC",
+          "name": "Active High Complementary",
+          "description": ""
+        },
+        {
+          "id": "ALC",
+          "name": "Active Low Complementary",
+          "description": ""
+        },
+        {
+          "id": "DUAL",
+          "name": "Dual Edge Delay Mode",
+          "description": ""
+        },
+        {
+          "id": "epwmDeadband_inputRED",
+          "name": "Rising Edge Delay Input",
+          "value": "Input signal is ePWMA",
+          "choices": [
+            "Input signal is ePWMA",
+            "Input signal is ePWMB"
+          ],
+          "description": "Select the source for DBRED (Rising Edge Delay)"
+        },
+        {
+          "id": "epwmDeadband_inputFED",
+          "name": "Falling Edge Delay Input",
+          "value": "Input signal is ePWMA",
+          "choices": [
+            "Input signal is ePWMA",
+            "Input signal is ePWMB",
+            "Input signal is the output of Rising Edge delay"
+          ],
+          "description": "Select the source for DBFED (Falling Edge Delay)"
+        },
+        {
+          "id": "epwmDeadband_polarityRED",
+          "name": "Rising Edge Delay Polarity",
+          "value": "DB polarity is not inverted",
+          "choices": [
+            "DB polarity is not inverted",
+            "DB polarity is inverted"
+          ],
+          "description": "Whether or not to invert RED (Rising Edge Delay)"
+        },
+        {
+          "id": "epwmDeadband_polarityFED",
+          "name": "Falling Edge Delay Polarity",
+          "value": "DB polarity is not inverted",
+          "choices": [
+            "DB polarity is not inverted",
+            "DB polarity is inverted"
+          ],
+          "description": "Whether or not to invert FED (Falling Edge Delay)"
+        },
+        {
+          "id": "epwmDeadband_enableRED",
+          "name": "Enable Rising Edge Delay",
+          "value": false,
+          "description": "Enable DBRED (Rising Edge Delay) by choosing it as the source for the A path"
+        },
+        {
+          "id": "epwmDeadband_redShadowLoadEvent",
+          "name": "RED Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": "Shadow to active load event for the RED (Rising Edge Delay) register."
+        },
+        {
+          "id": "epwmDeadband_redShadowMode",
+          "name": "Enable RED Shadow Mode",
+          "value": false,
+          "description": "Enable shadowing of the RED (Rising Edge Delay) register."
+        },
+        {
+          "id": "epwmDeadband_delayRED",
+          "name": "Rising Edge Delay Value",
+          "value": 0,
+          "description": "DBRED (Rising Edge Delay) delay value"
+        },
+        {
+          "id": "epwmDeadband_enableFED",
+          "name": "Enable Falling Edge Delay",
+          "value": false,
+          "description": "Enable DBFED (Falling Edge Delay) by choosing it as the source for the B path"
+        },
+        {
+          "id": "epwmDeadband_fedShadowLoadEvent",
+          "name": "FED Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": "Shadow to active load event for the FED (Falling Edge Delay) register."
+        },
+        {
+          "id": "epwmDeadband_fedShadowMode",
+          "name": "Enable FED Shadow Mode",
+          "value": false,
+          "description": "Enable shadowing of the FED (Falling Edge Delay) register."
+        },
+        {
+          "id": "epwmDeadband_delayFED",
+          "name": "Falling Edge Delay Value",
+          "value": 0,
+          "description": "DBFED (Falling Edge Delay) delay value"
+        },
+        {
+          "id": "epwmDeadband_outputSwapOutA",
+          "name": "Swap Output for EPWMxA",
+          "value": false,
+          "description": "Check to enable output swap. Channel A path to Out B."
+        },
+        {
+          "id": "epwmDeadband_outputSwapOutB",
+          "name": "Swap Output for EPWMxB",
+          "value": false,
+          "description": "Check to enable output swap. Channel B path to Out A."
+        },
+        {
+          "id": "epwmDeadband_dbControlGld",
+          "name": "Enable Deadband Control Global Load",
+          "value": false,
+          "description": "Use global load configuration for deadband control"
+        },
+        {
+          "id": "epwmDeadband_controlShadowLoadEvent",
+          "name": "Deadband Control Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": "Shadow to active load event for the DBCTL (Deadband Control) register."
+        },
+        {
+          "id": "epwmDeadband_controlShadowMode",
+          "name": "Enable Deadband Control Shadow Mode",
+          "value": false,
+          "description": "Enable shadowing of the DBCTL (Deadband Control) register."
+        },
+        {
+          "id": "epwmDeadband_redGld",
+          "name": "Enable RED Global Load",
+          "value": false,
+          "description": "Use global load configuration for RED"
+        },
+        {
+          "id": "epwmDeadband_fedGld",
+          "name": "Enable FED Global Load",
+          "value": false,
+          "description": "Use global load configuration for FED"
+        },
+        {
+          "id": "epwmDeadband_deadbandCounterClockRate",
+          "name": "Dead Band Counter Clock Rate",
+          "value": "Dead band counter runs at TBCLK rate",
+          "choices": [
+            "Dead band counter runs at TBCLK rate",
+            "Dead band counter runs at 2*TBCLK rate"
+          ],
+          "description": "Dead band counter clock rate."
+        },
+        {
+          "id": "epwmChopper_useChopper",
+          "name": "Use Chopper",
+          "value": false,
+          "description": "Check to configure the Chopper Submodule"
+        },
+        {
+          "id": "epwmTripZone_useAdvancedEPWMTripZoneActions",
+          "name": "Use Advanced EPWM Trip Zone Actions",
+          "value": false,
+          "description": "Check this to use Advanced EPWM trip zone actions. Uncheck to use legacy (TZCTL2[ETZE])"
+        },
+        {
+          "id": "epwmTripZone_EPWM_TZ_ACTION_EVENT_TZA",
+          "name": "TZA Event",
+          "value": "High impedance output",
+          "choices": [
+            "High impedance output",
+            "High voltage state",
+            "Low voltage state",
+            "Disable action"
+          ],
+          "description": "The action to take on EPWM_TZ_ACTION_EVENT_TZA. (TZ1 - TZ6, DCAEVT2, DCAEVT1)"
+        },
+        {
+          "id": "epwmTripZone_EPWM_TZ_ACTION_EVENT_TZB",
+          "name": "TZB Event",
+          "value": "High impedance output",
+          "choices": [
+            "High impedance output",
+            "High voltage state",
+            "Low voltage state",
+            "Disable action"
+          ],
+          "description": "The action to take on EPWM_TZ_ACTION_EVENT_TZB. (TZ1 - TZ6, DCBEVT2, DCBEVT1)"
+        },
+        {
+          "id": "epwmTripZone_EPWM_TZ_ACTION_EVENT_DCAEVT1",
+          "name": "DCAEVT1 Event",
+          "value": "High impedance output",
+          "choices": [
+            "High impedance output",
+            "High voltage state",
+            "Low voltage state",
+            "Disable action"
+          ],
+          "description": "The action to take on EPWM_TZ_ACTION_EVENT_DCAEVT1. (DCAEVT1 (Digital Compare A event 1))"
+        },
+        {
+          "id": "epwmTripZone_EPWM_TZ_ACTION_EVENT_DCAEVT2",
+          "name": "DCAEVT2 Event",
+          "value": "High impedance output",
+          "choices": [
+            "High impedance output",
+            "High voltage state",
+            "Low voltage state",
+            "Disable action"
+          ],
+          "description": "The action to take on EPWM_TZ_ACTION_EVENT_DCAEVT2. (DCAEVT2 (Digital Compare A event 2))"
+        },
+        {
+          "id": "epwmTripZone_EPWM_TZ_ACTION_EVENT_DCBEVT1",
+          "name": "DCBEVT1 Event",
+          "value": "High impedance output",
+          "choices": [
+            "High impedance output",
+            "High voltage state",
+            "Low voltage state",
+            "Disable action"
+          ],
+          "description": "The action to take on EPWM_TZ_ACTION_EVENT_DCBEVT1. (DCBEVT1 (Digital Compare B event 1))"
+        },
+        {
+          "id": "epwmTripZone_EPWM_TZ_ACTION_EVENT_DCBEVT2",
+          "name": "DCBEVT2 Event",
+          "value": "High impedance output",
+          "choices": [
+            "High impedance output",
+            "High voltage state",
+            "Low voltage state",
+            "Disable action"
+          ],
+          "description": "The action to take on EPWM_TZ_ACTION_EVENT_DCBEVT2. (DCBEVT2 (Digital Compare B event 2))"
+        },
+        {
+          "id": "epwmTripZone_oneShotSource",
+          "name": "One-Shot Source",
+          "value": [],
+          "choices": [
+            "One-shot TZ1",
+            "One-shot TZ2",
+            "One-shot TZ3",
+            "One-shot TZ4",
+            "One-shot TZ5",
+            "One-shot TZ6",
+            "One-shot DCAEVT1",
+            "One-shot DCBEVT1"
+          ],
+          "description": "Check to enable the source to the One-Shot OR gate"
+        },
+        {
+          "id": "epwmTripZone_cbcSource",
+          "name": "CBC Source",
+          "value": [],
+          "choices": [
+            "TZ1 Cycle By Cycle",
+            "TZ2 Cycle By Cycle",
+            "TZ3 Cycle By Cycle",
+            "TZ4 Cycle By Cycle",
+            "TZ5 Cycle By Cycle",
+            "TZ6 Cycle By Cycle",
+            "DCAEVT2 Cycle By Cycle",
+            "DCBEVT2 Cycle By Cycle"
+          ],
+          "description": "Check to enable the source to the CBC OR gate"
+        },
+        {
+          "id": "epwmTripZone_cbcPulse",
+          "name": "CBC Latch Clear Signal",
+          "value": "Clear CBC pulse when counter equals zero",
+          "choices": [
+            "Clear CBC pulse when counter equals zero",
+            "Clear CBC pulse when counter equals period",
+            "Clear CBC pulse when counter equals zero or period"
+          ],
+          "description": "Select the CBC Trip Zone Latch Clear Signal (TZCLR[CBCPULSE])"
+        },
+        {
+          "id": "epwmTripZone_tzInterruptSource",
+          "name": "TZ Interrupt Source (ORed)",
+          "value": [],
+          "choices": [
+            "Trip Zones Cycle By Cycle interrupt",
+            "Trip Zones One Shot interrupt",
+            "Digital Compare A Event 1 interrupt",
+            "Digital Compare A Event 2 interrupt",
+            "Digital Compare B Event 1 interrupt",
+            "Digital Compare B Event 2 interrupt"
+          ],
+          "description": "Select the all the signals which should be enabled to generate a TZINT."
+        },
+        {
+          "id": "epwmTripZone_registerInterrupts",
+          "name": "Register Interrupt Handler",
+          "value": false,
+          "description": "Whether or not to register interrupt handlers in the interrupt module."
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_TYPE_DCAH",
+          "name": "Digital Compare A High",
+          "value": "Trip 1",
+          "choices": [
+            "Trip 1",
+            "Trip 2",
+            "Trip 3",
+            "Trip 4",
+            "Trip 5",
+            "Trip 6",
+            "Trip 7",
+            "Trip 8",
+            "Trip 9",
+            "Trip 10",
+            "Trip 11",
+            "Trip 12",
+            "Trip 14",
+            "Trip 15",
+            "All Trips (Trip1 - Trip 15) are selected"
+          ],
+          "description": "Trip input to the Digital Compare A High"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_TYPE_DCAH_combinationInputConfig",
+          "name": "Combination Input Sources (Digital Compare A High)",
+          "value": [],
+          "choices": [
+            "Combinational Trip 1 input",
+            "Combinational Trip 2 input",
+            "Combinational Trip 3 input",
+            "Combinational Trip 4 input",
+            "Combinational Trip 5 input",
+            "Combinational Trip 6 input",
+            "Combinational Trip 7 input",
+            "Combinational Trip 8 input",
+            "Combinational Trip 9 input",
+            "Combinational Trip 10 input",
+            "Combinational Trip 11 input",
+            "Combinational Trip 12 input",
+            "Combinational Trip 14 input",
+            "Combinational Trip 15 input"
+          ],
+          "description": "Select the sources to include in the Combination input sources"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_TYPE_DCAL",
+          "name": "Digital Compare A Low",
+          "value": "Trip 1",
+          "choices": [
+            "Trip 1",
+            "Trip 2",
+            "Trip 3",
+            "Trip 4",
+            "Trip 5",
+            "Trip 6",
+            "Trip 7",
+            "Trip 8",
+            "Trip 9",
+            "Trip 10",
+            "Trip 11",
+            "Trip 12",
+            "Trip 14",
+            "Trip 15",
+            "All Trips (Trip1 - Trip 15) are selected"
+          ],
+          "description": "Trip input to the Digital Compare A Low"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_TYPE_DCAL_combinationInputConfig",
+          "name": "Combination Input Sources (Digital Compare A Low)",
+          "value": [],
+          "choices": [
+            "Combinational Trip 1 input",
+            "Combinational Trip 2 input",
+            "Combinational Trip 3 input",
+            "Combinational Trip 4 input",
+            "Combinational Trip 5 input",
+            "Combinational Trip 6 input",
+            "Combinational Trip 7 input",
+            "Combinational Trip 8 input",
+            "Combinational Trip 9 input",
+            "Combinational Trip 10 input",
+            "Combinational Trip 11 input",
+            "Combinational Trip 12 input",
+            "Combinational Trip 14 input",
+            "Combinational Trip 15 input"
+          ],
+          "description": "Select the sources to include in the Combination input sources"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_TZ_DC_OUTPUT_A1",
+          "name": "Condition For Digital Compare output 1 A",
+          "value": "Event is disabled",
+          "choices": [
+            "Event is disabled",
+            "Event when DCxH low",
+            "Event when DCxH high",
+            "Event when DCxL low",
+            "Event when DCxL high",
+            "Event when DCxL high DCxH low"
+          ],
+          "description": "Select the Condition for Digital Compare output 1 A for which the EVENT is generated."
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_TZ_DC_OUTPUT_A2",
+          "name": "Condition For Digital Compare output 2 A",
+          "value": "Event is disabled",
+          "choices": [
+            "Event is disabled",
+            "Event when DCxH low",
+            "Event when DCxH high",
+            "Event when DCxL low",
+            "Event when DCxL high",
+            "Event when DCxL high DCxH low"
+          ],
+          "description": "Select the Condition for Digital Compare output 2 A for which the EVENT is generated."
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_A_EPWM_DC_EVENT_1_adcTrig",
+          "name": "Generate ADC SOC (DCAEVT1)",
+          "value": false,
+          "description": "Enable/disable generation of ADC SOC Event for Digital Compare Module A Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_A_EPWM_DC_EVENT_1_syncTrig",
+          "name": "Generate SYNCOUT (DCAEVT1)",
+          "value": false,
+          "description": "Enable/disable generation of SYNCOUTEvent for Digital Compare Module A Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_A_EPWM_DC_EVENT_1_eventSync",
+          "name": "Synch Mode (DCAEVT1)",
+          "value": "DC input signal is synced with TBCLK",
+          "choices": [
+            "DC input signal is synced with TBCLK",
+            "DC input signal is not synced with TBCLK"
+          ],
+          "description": "Select the Sync Mode for Digital Compare Module A Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_A_EPWM_DC_EVENT_1_eventSource",
+          "name": "Signal Source (DCAEVT1)",
+          "value": "Signal source is unfiltered (DCAEVT1/2)",
+          "choices": [
+            "Signal source is unfiltered (DCAEVT1/2)",
+            "Signal source is filtered (DCEVTFILT)"
+          ],
+          "description": "Select the Signal Source for Digital Compare Module A Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_A_EPWM_DC_EVENT_1_latchMode",
+          "name": "CBC Latch Mode (DCAEVT1)",
+          "value": "DC cycle-by-cycle(CBC) latch is disabled",
+          "choices": [
+            "DC cycle-by-cycle(CBC) latch is disabled",
+            "DC cycle-by-cycle(CBC) latch is enabled"
+          ],
+          "description": "Select the CBC latch mode for Digital Compare Module A Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_A_EPWM_DC_EVENT_1_latchClearEvent",
+          "name": "CBC Latch Clear Event (DCAEVT1)",
+          "value": "Clear CBC latch when counter equals zero",
+          "choices": [
+            "Clear CBC latch when counter equals zero",
+            "Clear CBC latch when counter equals period",
+            "Clear CBC latch when counter equals zero or period"
+          ],
+          "description": "Select the CBC latch clear event for Digital Compare Module A Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_A_EPWM_DC_EVENT_2_eventSync",
+          "name": "Synch Mode (DCAEVT2)",
+          "value": "DC input signal is synced with TBCLK",
+          "choices": [
+            "DC input signal is synced with TBCLK",
+            "DC input signal is not synced with TBCLK"
+          ],
+          "description": "Select the Sync Mode for Digital Compare Module A Digital Compare Event number 2"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_A_EPWM_DC_EVENT_2_eventSource",
+          "name": "Signal Source (DCAEVT2)",
+          "value": "Signal source is unfiltered (DCAEVT1/2)",
+          "choices": [
+            "Signal source is unfiltered (DCAEVT1/2)",
+            "Signal source is filtered (DCEVTFILT)"
+          ],
+          "description": "Select the Signal Source for Digital Compare Module A Digital Compare Event number 2"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_A_EPWM_DC_EVENT_2_latchMode",
+          "name": "CBC Latch Mode (DCAEVT2)",
+          "value": "DC cycle-by-cycle(CBC) latch is disabled",
+          "choices": [
+            "DC cycle-by-cycle(CBC) latch is disabled",
+            "DC cycle-by-cycle(CBC) latch is enabled"
+          ],
+          "description": "Select the CBC latch mode for Digital Compare Module A Digital Compare Event number 2"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_A_EPWM_DC_EVENT_2_latchClearEvent",
+          "name": "CBC Latch Clear Event (DCAEVT2)",
+          "value": "Clear CBC latch when counter equals zero",
+          "choices": [
+            "Clear CBC latch when counter equals zero",
+            "Clear CBC latch when counter equals period",
+            "Clear CBC latch when counter equals zero or period"
+          ],
+          "description": "Select the CBC latch clear event for Digital Compare Module A Digital Compare Event number 2"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_TYPE_DCBH",
+          "name": "Digital Compare B High",
+          "value": "Trip 1",
+          "choices": [
+            "Trip 1",
+            "Trip 2",
+            "Trip 3",
+            "Trip 4",
+            "Trip 5",
+            "Trip 6",
+            "Trip 7",
+            "Trip 8",
+            "Trip 9",
+            "Trip 10",
+            "Trip 11",
+            "Trip 12",
+            "Trip 14",
+            "Trip 15",
+            "All Trips (Trip1 - Trip 15) are selected"
+          ],
+          "description": "Trip input to the Digital Compare B High"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_TYPE_DCBH_combinationInputConfig",
+          "name": "Combination Input Sources (Digital Compare B High)",
+          "value": [],
+          "choices": [
+            "Combinational Trip 1 input",
+            "Combinational Trip 2 input",
+            "Combinational Trip 3 input",
+            "Combinational Trip 4 input",
+            "Combinational Trip 5 input",
+            "Combinational Trip 6 input",
+            "Combinational Trip 7 input",
+            "Combinational Trip 8 input",
+            "Combinational Trip 9 input",
+            "Combinational Trip 10 input",
+            "Combinational Trip 11 input",
+            "Combinational Trip 12 input",
+            "Combinational Trip 14 input",
+            "Combinational Trip 15 input"
+          ],
+          "description": "Select the sources to include in the Combination input sources"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_TYPE_DCBL",
+          "name": "Digital Compare B Low",
+          "value": "Trip 1",
+          "choices": [
+            "Trip 1",
+            "Trip 2",
+            "Trip 3",
+            "Trip 4",
+            "Trip 5",
+            "Trip 6",
+            "Trip 7",
+            "Trip 8",
+            "Trip 9",
+            "Trip 10",
+            "Trip 11",
+            "Trip 12",
+            "Trip 14",
+            "Trip 15",
+            "All Trips (Trip1 - Trip 15) are selected"
+          ],
+          "description": "Trip input to the Digital Compare B Low"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_TYPE_DCBL_combinationInputConfig",
+          "name": "Combination Input Sources (Digital Compare B Low)",
+          "value": [],
+          "choices": [
+            "Combinational Trip 1 input",
+            "Combinational Trip 2 input",
+            "Combinational Trip 3 input",
+            "Combinational Trip 4 input",
+            "Combinational Trip 5 input",
+            "Combinational Trip 6 input",
+            "Combinational Trip 7 input",
+            "Combinational Trip 8 input",
+            "Combinational Trip 9 input",
+            "Combinational Trip 10 input",
+            "Combinational Trip 11 input",
+            "Combinational Trip 12 input",
+            "Combinational Trip 14 input",
+            "Combinational Trip 15 input"
+          ],
+          "description": "Select the sources to include in the Combination input sources"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_TZ_DC_OUTPUT_B1",
+          "name": "Condition For Digital Compare output 1 B",
+          "value": "Event is disabled",
+          "choices": [
+            "Event is disabled",
+            "Event when DCxH low",
+            "Event when DCxH high",
+            "Event when DCxL low",
+            "Event when DCxL high",
+            "Event when DCxL high DCxH low"
+          ],
+          "description": "Select the Condition for Digital Compare output 1 B for which the EVENT is generated."
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_TZ_DC_OUTPUT_B2",
+          "name": "Condition For Digital Compare output 2 B",
+          "value": "Event is disabled",
+          "choices": [
+            "Event is disabled",
+            "Event when DCxH low",
+            "Event when DCxH high",
+            "Event when DCxL low",
+            "Event when DCxL high",
+            "Event when DCxL high DCxH low"
+          ],
+          "description": "Select the Condition for Digital Compare output 2 B for which the EVENT is generated."
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_B_EPWM_DC_EVENT_1_adcTrig",
+          "name": "Generate ADC SOC (DCBEVT1)",
+          "value": false,
+          "description": "Enable/disable generation of ADC SOC Event for Digital Compare Module B Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_B_EPWM_DC_EVENT_1_syncTrig",
+          "name": "Generate SYNCOUT (DCBEVT1)",
+          "value": false,
+          "description": "Enable/disable generation of SYNCOUTEvent for Digital Compare Module B Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_B_EPWM_DC_EVENT_1_eventSync",
+          "name": "Synch Mode (DCBEVT1)",
+          "value": "DC input signal is synced with TBCLK",
+          "choices": [
+            "DC input signal is synced with TBCLK",
+            "DC input signal is not synced with TBCLK"
+          ],
+          "description": "Select the Sync Mode for Digital Compare Module B Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_B_EPWM_DC_EVENT_1_eventSource",
+          "name": "Signal Source (DCBEVT1)",
+          "value": "Signal source is unfiltered (DCAEVT1/2)",
+          "choices": [
+            "Signal source is unfiltered (DCAEVT1/2)",
+            "Signal source is filtered (DCEVTFILT)"
+          ],
+          "description": "Select the Signal Source for Digital Compare Module B Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_B_EPWM_DC_EVENT_1_latchMode",
+          "name": "CBC Latch Mode (DCBEVT1)",
+          "value": "DC cycle-by-cycle(CBC) latch is disabled",
+          "choices": [
+            "DC cycle-by-cycle(CBC) latch is disabled",
+            "DC cycle-by-cycle(CBC) latch is enabled"
+          ],
+          "description": "Select the CBC latch mode for Digital Compare Module B Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_B_EPWM_DC_EVENT_1_latchClearEvent",
+          "name": "CBC Latch Clear Event (DCBEVT1)",
+          "value": "Clear CBC latch when counter equals zero",
+          "choices": [
+            "Clear CBC latch when counter equals zero",
+            "Clear CBC latch when counter equals period",
+            "Clear CBC latch when counter equals zero or period"
+          ],
+          "description": "Select the CBC latch clear event for Digital Compare Module B Digital Compare Event number 1"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_B_EPWM_DC_EVENT_2_eventSync",
+          "name": "Synch Mode (DCBEVT2)",
+          "value": "DC input signal is synced with TBCLK",
+          "choices": [
+            "DC input signal is synced with TBCLK",
+            "DC input signal is not synced with TBCLK"
+          ],
+          "description": "Select the Sync Mode for Digital Compare Module B Digital Compare Event number 2"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_B_EPWM_DC_EVENT_2_eventSource",
+          "name": "Signal Source (DCBEVT2)",
+          "value": "Signal source is unfiltered (DCAEVT1/2)",
+          "choices": [
+            "Signal source is unfiltered (DCAEVT1/2)",
+            "Signal source is filtered (DCEVTFILT)"
+          ],
+          "description": "Select the Signal Source for Digital Compare Module B Digital Compare Event number 2"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_B_EPWM_DC_EVENT_2_latchMode",
+          "name": "CBC Latch Mode (DCBEVT2)",
+          "value": "DC cycle-by-cycle(CBC) latch is disabled",
+          "choices": [
+            "DC cycle-by-cycle(CBC) latch is disabled",
+            "DC cycle-by-cycle(CBC) latch is enabled"
+          ],
+          "description": "Select the CBC latch mode for Digital Compare Module B Digital Compare Event number 2"
+        },
+        {
+          "id": "epwmDigitalCompare_EPWM_DC_MODULE_B_EPWM_DC_EVENT_2_latchClearEvent",
+          "name": "CBC Latch Clear Event (DCBEVT2)",
+          "value": "Clear CBC latch when counter equals zero",
+          "choices": [
+            "Clear CBC latch when counter equals zero",
+            "Clear CBC latch when counter equals period",
+            "Clear CBC latch when counter equals zero or period"
+          ],
+          "description": "Select the CBC latch clear event for Digital Compare Module B Digital Compare Event number 2"
+        },
+        {
+          "id": "epwmDigitalCompare_dcFilterInput",
+          "name": "Digital Compare Filter Input (DCEVTFILT event source)",
+          "value": "DC filter signal source is DCAEVT1",
+          "choices": [
+            "DC filter signal source is DCAEVT1",
+            "DC filter signal source is DCAEVT2",
+            "DC filter signal source is DCBEVT1",
+            "DC filter signal source is DCBEVT2"
+          ],
+          "description": "Select the event source for the DCEVTFILT signal"
+        },
+        {
+          "id": "epwmDigitalCompare_useBlankingWindow",
+          "name": "Use Blanking Window",
+          "value": false,
+          "description": "Use blanking window to blank the DCEVTFILT signal"
+        },
+        {
+          "id": "epwmDigitalCompare_useDCCounterCapture",
+          "name": "Use DC Counter Capture",
+          "value": false,
+          "description": "Use the DC Counter Capture feature to capture the TBCTR value at the selected event."
+        },
+        {
+          "id": "epwmDigitalCompare_useEdgeFilter",
+          "name": "Use Edge Filter",
+          "value": false,
+          "description": "The DCEVTFILT signal and DCCAP (Counter Capture) will use the output of the edge filter"
+        },
+        {
+          "id": "epwmEventTrigger_enableInterrupt",
+          "name": "Enable EPWM Interrupt",
+          "value": true,
+          "description": "Check to enable EPWM interrupt"
+        },
+        {
+          "id": "epwmEventTrigger_registerInterrupts",
+          "name": "Register Interrupt Handler",
+          "value": false,
+          "description": "Whether or not to register interrupt handlers in the interrupt module."
+        },
+        {
+          "id": "epwmEventTrigger_interruptSource",
+          "name": "Interrupt Event Sources",
+          "value": "Time-base counter is disabled",
+          "choices": [
+            "Time-base counter is disabled",
+            "Time-base counter equal to zero",
+            "Time-base counter equal to period",
+            "Time-base counter equal to zero or period",
+            "time-base counter equal to CMPA when the timer is incrementing",
+            "time-base counter equal to CMPC when the timer is incrementing",
+            "time-base counter equal to CMPA when the timer is decrementing",
+            "time-base counter equal to CMPC when the timer is decrementing",
+            "time-base counter equal to CMPB when the timer is incrementing",
+            "time-base counter equal to CMPD when the timer is incrementing",
+            "time-base counter equal to CMPB when the timer is decrementing",
+            "time-base counter equal to CMPD when the timer is decrementing"
+          ],
+          "description": "Select all events that must be enabled to generate an EPWM interrupt"
+        },
+        {
+          "id": "epwmEventTrigger_interruptEventCount",
+          "name": "Interrupt Event Count",
+          "value": "1 Event Generates Interrupt",
+          "choices": [
+            "Disabled",
+            "1 Event Generates Interrupt",
+            "2 Events Generates Interrupt",
+            "3 Events Generates Interrupt",
+            "4 Events Generates Interrupt",
+            "5 Events Generates Interrupt",
+            "6 Events Generates Interrupt",
+            "7 Events Generates Interrupt",
+            "8 Events Generates Interrupt",
+            "9 Events Generates Interrupt",
+            "10 Events Generates Interrupt",
+            "11 Events Generates Interrupt",
+            "12 Events Generates Interrupt",
+            "13 Events Generates Interrupt",
+            "14 Events Generates Interrupt",
+            "15 Events Generates Interrupt"
+          ],
+          "description": "The number of events that have to occur before an interrupt is issued"
+        },
+        {
+          "id": "epwmEventTrigger_interruptEventCountInitEnable",
+          "name": "Interrupt Event Count Initial Value Load Enable",
+          "value": false,
+          "description": "Enables the ePWM interrupt counter to be pre-interrupt loaded with a count value after a SYNC or software force"
+        },
+        {
+          "id": "epwmEventTrigger_interruptEventCountInitForce",
+          "name": "Force Interrupt Event Count Initial Value",
+          "value": false,
+          "description": "Forces the ePWM interrupt counter to be pre-interrupt loaded with the init count value"
+        },
+        {
+          "id": "epwmEventTrigger_EPWM_SOC_A_triggerEnable",
+          "name": "SOCA Trigger Enable",
+          "value": false,
+          "description": "Enable the SOC trigger generated by the ET submodule for SOCA"
+        },
+        {
+          "id": "epwmEventTrigger_EPWM_SOC_B_triggerEnable",
+          "name": "SOCB Trigger Enable",
+          "value": false,
+          "description": "Enable the SOC trigger generated by the ET submodule for SOCB"
+        },
+        {
+          "id": "hrpwm_enable",
+          "name": "Enable HRPWM Support",
+          "value": false,
+          "description": "Click the checkbox to enable hrpwm support"
+        },
+        {
+          "id": "useCase",
+          "name": "PinMux Use Case",
+          "value": "ALL",
+          "choices": [
+            "CUSTOM",
+            "ALL"
+          ],
+          "description": "Peripheral use case"
+        },
+        {
+          "id": "epwm",
+          "name": "EPWM Peripheral",
+          "desiredValue": "EPWM1",
+          "assignedValue": "EPWM1",
+          "choices": [
+            "EPWM1",
+            "EPWM3"
+          ]
+        },
+        {
+          "id": "epwm.epwm_aPin",
+          "name": "EPWM_A",
+          "desiredValue": "GPIO0/52",
+          "assignedValue": "GPIO0/52",
+          "choices": [
+            "A2/C9, GPIO224/9",
+            "GPIO0/52",
+            "GPIO4/48"
+          ]
+        },
+        {
+          "id": "epwm.epwm_bPin",
+          "name": "EPWM_B",
+          "desiredValue": "GPIO1/51",
+          "assignedValue": "GPIO1/51",
+          "choices": [
+            "C6, GPIO226/7",
+            "GPIO1/51",
+            "GPIO5/61"
+          ]
+        },
+        {
+          "id": "aQual.padConfig",
+          "name": "Pin Type",
+          "value": "Push-pull output/floating input",
+          "choices": [
+            "Push-pull output/floating input",
+            "Push-pull output/pull-up enabled on input",
+            "Push-pull output/floating INVERTED polarity on an input",
+            "Push-pull output/pull-up enabled on INVERTED input",
+            "Open-drain output/floating input",
+            "Open-drain output with pull-up enabled output and input",
+            "Open-drain output/floating inverted input",
+            "Open-drain output with pull-up enabled output and INVERTED input"
+          ],
+          "description": "Type of pin is driving the gpio."
+        },
+        {
+          "id": "aQual.qualMode",
+          "name": "Qualification Mode",
+          "value": "Synchronization to SYSCLK",
+          "choices": [
+            "Synchronization to SYSCLK",
+            "Qualified with 3 samples",
+            "Qualified with 6 samples",
+            "No synchronization"
+          ],
+          "description": "The type of qualification done on the pin."
+        },
+        {
+          "id": "bQual.padConfig",
+          "name": "Pin Type",
+          "value": "Push-pull output/floating input",
+          "choices": [
+            "Push-pull output/floating input",
+            "Push-pull output/pull-up enabled on input",
+            "Push-pull output/floating INVERTED polarity on an input",
+            "Push-pull output/pull-up enabled on INVERTED input",
+            "Open-drain output/floating input",
+            "Open-drain output with pull-up enabled output and input",
+            "Open-drain output/floating inverted input",
+            "Open-drain output with pull-up enabled output and INVERTED input"
+          ],
+          "description": "Type of pin is driving the gpio."
+        },
+        {
+          "id": "bQual.qualMode",
+          "name": "Qualification Mode",
+          "value": "Synchronization to SYSCLK",
+          "choices": [
+            "Synchronization to SYSCLK",
+            "Qualified with 3 samples",
+            "Qualified with 6 samples",
+            "No synchronization"
+          ],
+          "description": "The type of qualification done on the pin."
+        }
+      ],
+      "commonSettingsAffectingAllInstances": [
+        {
+          "id": "$static.enableInfo",
+          "name": "Enable Info Mode",
+          "value": true
+        },
+        {
+          "id": "$static.enableWarning",
+          "name": "Enable Warnings",
+          "value": true
+        },
+        {
+          "id": "$static.enableAllCode",
+          "name": "Enable All Code Generation",
+          "value": false,
+          "description": "Enable All Code Generation"
+        },
+        {
+          "id": "$static.commentOutDefaultCode",
+          "name": "Comment Out the Default Settings Code",
+          "value": false,
+          "description": "Comment Out the Default Settings Code"
+        },
+        {
+          "id": "$static.generateInitFunctions",
+          "name": "Generate Init Function for Each Instance",
+          "value": false,
+          "description": "Generate Init Function for Each Instance"
+        }
+      ]
+    }
+  ]
+}

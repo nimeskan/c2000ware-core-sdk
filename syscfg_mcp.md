@@ -132,10 +132,9 @@ condition that keeps them available as unconfirmed.
 
 ### Symptom
 
-Calling `openFile` on a `.syscfg` file whose owning `.projectspec` used a
-generic device ID (e.g. `F280013x` rather than a concrete part like
-`TMS320F2800137`) **never returns**. The MCP client eventually gives up
-with:
+Calling `openFile` on a `.syscfg` file that lacks a `@v2CliArgs` header
+comment with a fully-resolved device **never returns**. The MCP client
+eventually gives up with:
 
 ```json
 {"error": {"code": -32001, "message": "MCP error -32001: MCP error -32001: Request timed out"}}
@@ -186,6 +185,55 @@ and reporting failure back to the caller; it does **not** mean the
 server gave up — the hung `runtimeServer.js` process and unopened ports
 persist unless the process is killed.
 
+### The precise trigger: missing/incomplete `@v2CliArgs` header in the `.syscfg` file itself
+
+Every generated `.syscfg` file carries a header comment recording the
+arguments it was last configured with. There are two possible directives:
+
+```
+* @cliArgs --device "F28E12x" --package "48PT" --part "F28E12x_48PT" --context "system" --product "C2000WARE@5.04.00.00"
+* @v2CliArgs --device "F28E120SC" --package "48PT" --product "C2000WARE@6.00.00.00"
+```
+
+`@cliArgs` is the older format and can reference a **generic device
+family** (`F28E12x` above — no specific part). `@v2CliArgs` is the newer
+format and, when present, pins a **fully-specific device** (`F28E120SC`
+above — an exact part, no family-level ambiguity).
+
+Two real examples from this repo, tested back-to-back:
+
+| File | Header present | `openFile` result |
+|---|---|---|
+| `driverlib/f280013x/examples/epwm/epwm_ex3_synchronization.syscfg` | **No `@cliArgs`/`@v2CliArgs` comment at all** — first few lines are straight into `scripting.addModule(...)` calls, no header | Hung indefinitely — confirmed 3/3 attempts, always exactly 60s |
+| `driverlib/f28e12x/examples/mcpwm/mcpwm_ex2_synchronization.syscfg` | Has **both** `@cliArgs` (generic `F28E12x`) **and** `@v2CliArgs` (fully-specific `F28E120SC` + package `48PT`) | Opened cleanly — ~7.5s cold (first-ever open in this backend process), ~0.9s warm (second open, same file) — **no dialog at all** |
+
+This isolates the actual condition precisely: the dialog fires because
+`openFile` has no unambiguous device to resolve to on its own — not
+because the *project's* device ID is generic, but because the
+**`.syscfg` file's own header lacks (or only partially provides) a fully
+resolved device**. A `.projectspec` can still reference a generic device
+family (as both of these do — `F280013x`/`F28E12x`) without causing a
+problem, *as long as the resulting `.syscfg` file itself carries a
+`@v2CliArgs` line with a real, specific part.*
+
+Practical takeaway: **grep the target `.syscfg` file for `@v2CliArgs`
+before calling `openFile` on it.** If the line is present with a real
+device name, expect a fast, dialog-free open. If it's absent, expect the
+first-ever `openFile` in a given CCS backend process to hang until a
+human (or GUI automation) clicks through the device-selection dialog
+once.
+
+```bash
+grep -n "@cliArgs\|@v2CliArgs" path/to/file.syscfg
+```
+
+Also confirmed: `build` (via the `project` MCP server's `buildProject`,
+or the plain `ccs-server-cli.sh` CLI) **never** hits this dialog either
+way, regardless of which header is present or absent — it calls
+`sysconfig_cli.sh` directly with explicit `--device`/`--package`/`--part`
+flags baked into the `.projectspec`'s `sysConfigBuildOptions`, bypassing
+the interactive GUI-backed engine that `openFile` uses entirely.
+
 ### Workaround (used to confirm this)
 
 Resolve the dialog once, by hand, through the actual GUI (see
@@ -209,10 +257,14 @@ below.
 
 ### Practical implications
 
-- **Each fresh `.syscfg` file** whose device isn't already fully
-  resolved will hit this dialog exactly once. Projects built from
-  `.projectspec` files with a concrete device ID (not a generic family
-  name) may never trigger it at all — worth testing per-project.
+- **Each fresh `.syscfg` file lacking a `@v2CliArgs` header with a
+  specific device** will hit this dialog exactly once, the first time
+  any MCP client calls `openFile` on it in a given CCS backend process.
+  Files that already carry a resolved `@v2CliArgs` line — including ones
+  whose owning `.projectspec` referenced a generic device family —
+  open cleanly with no dialog at all. Check with
+  `grep "@v2CliArgs" file.syscfg` before opening to know which case
+  you're in.
 - **The resolution is per-file, not per-connection.** MCP session state
   (which tools are registered, whether a file is "open") is
   per-connection and does not persist across separate

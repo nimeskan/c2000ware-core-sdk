@@ -442,6 +442,110 @@ pre-`openFile`/generic-connection-tools (23-tool) list.
 - **Description:** Atomic multi-configurable change with full delta
   reporting, including cascading module add/remove side-effects.
 
+  > **Key finding — `value` accepts driverlib constant names, not just
+  > display strings, for choice-type configurables.** For a configurable
+  > whose `choices` are display strings like `"Up - count mode"`, passing
+  > the underlying driverlib enum constant name instead (e.g.
+  > `"EPWM_COUNTER_MODE_UP"`) **also works** — SysConfig resolves it to
+  > the matching display choice automatically, and the response's
+  > `changed[].value` comes back as the resolved display string, not the
+  > constant you sent. Confirmed with two different constants against
+  > the same configurable (see live examples below). This means a caller
+  > that already knows the driverlib API doesn't need to first call
+  > `getInstanceConfiguration` just to learn the exact display-string
+  > wording before it can set a value.
+
+  #### Live examples (all against `myEPWM1` in `epwm_ex3_synchronization`)
+
+  **1. Numeric value — plain change, no side effects:**
+  ```json
+  // request
+  {"changes": [{"moduleId": "/driverlib/epwm.js", "moduleInstanceId": "myEPWM1",
+                "configurable": "epwmTimebase_period", "value": 3000}],
+   "description": "Demo: change myEPWM1 period from 2000 to 3000"}
+
+  // response
+  {"changes": [{"moduleId": "/driverlib/epwm.js", "moduleInstanceId": "myEPWM1",
+                "changed": [{"id": "epwmTimebase_period", "value": 3000}]}]}
+  ```
+  Only `changed` is present — no `available`/`unavailable`, no
+  `addedInstances`/`removedInstances` — because nothing else was
+  affected by this one change.
+
+  **2. Choice value via display string — reveals a new configurable:**
+  ```json
+  // request
+  {"changes": [{"moduleId": "/driverlib/epwm.js", "moduleInstanceId": "myEPWM1",
+                "configurable": "epwmTimebase_counterMode",
+                "value": "Up - down - count mode"}],
+   "description": "Demo: change myEPWM1 counter mode to up-down"}
+
+  // response
+  {"changes": [{
+    "moduleId": "/driverlib/epwm.js", "moduleInstanceId": "myEPWM1",
+    "available": [{
+      "id": "epwmTimebase_counterModeAfterSync",
+      "name": "Counter Mode After Sync",
+      "value": "Count down after sync event",
+      "choices": ["Count down after sync event", "Count up after sync event"],
+      "readOnly": false, "errors": [], "warnings": [], "infos": []
+    }],
+    "changed": [{"id": "epwmTimebase_counterMode", "value": "Up - down - count mode"}]
+  }]}
+  ```
+  Switching to "Up - down" mode made a brand-new configurable appear —
+  **"Counter Mode After Sync"** — which has no meaning in plain "Up"
+  mode. It arrives via `available` with **full state** (value, choices,
+  `readOnly`, and empty `errors`/`warnings`/`infos` arrays), unlike
+  `changed` entries which are sparse (only the fields that actually
+  differ).
+
+  **3. Choice value via driverlib constant — resolves + reverses the
+  side effect:**
+  ```json
+  // request (current value was "Up - down - count mode" from example 2)
+  {"changes": [{"moduleId": "/driverlib/epwm.js", "moduleInstanceId": "myEPWM1",
+                "configurable": "epwmTimebase_counterMode",
+                "value": "EPWM_COUNTER_MODE_UP"}],
+   "description": "Test: try the underlying driverlib constant name instead of display string"}
+
+  // response
+  {"changes": [{
+    "moduleId": "/driverlib/epwm.js", "moduleInstanceId": "myEPWM1",
+    "changed": [{"id": "epwmTimebase_counterMode", "value": "Up - count mode"}],
+    "unavailable": ["epwmTimebase_counterModeAfterSync"]
+  }]}
+  ```
+  `EPWM_COUNTER_MODE_UP` resolved to `"Up - count mode"` (proof it's a
+  real resolution, not a passthrough: the value that came back is the
+  display string, not the constant that was sent). Moving back out of
+  "Up - down" mode made `epwmTimebase_counterModeAfterSync` disappear
+  again — reported via `unavailable` (a plain array of configurable IDs,
+  the mirror image of `available`).
+
+  **4. A second constant, no side effects this time:**
+  ```json
+  // request
+  {"changes": [{"moduleId": "/driverlib/epwm.js", "moduleInstanceId": "myEPWM1",
+                "configurable": "epwmTimebase_counterMode",
+                "value": "EPWM_COUNTER_MODE_STOP_FREEZE"}],
+   "description": "Test: driverlib constant for stop/freeze counter mode"}
+
+  // response
+  {"changes": [{"moduleId": "/driverlib/epwm.js", "moduleInstanceId": "myEPWM1",
+                "changed": [{"id": "epwmTimebase_counterMode", "value": "Stop - Freeze counter"}]}]}
+  ```
+  Resolved correctly again. No `available`/`unavailable` this time,
+  because both the prior state (`"Up - count mode"`) and the new one
+  (`"Stop - Freeze counter"`) are non-up-down modes — `
+  epwmTimebase_counterModeAfterSync` was already absent and stays
+  absent, so there's no transition to report.
+
+  All four calls above were made **in memory only** — `save` was not
+  called after any of them, so none of this reached the `.syscfg` file
+  on disk. `myEPWM1`'s in-memory state after all four calls:
+  `period=3000`, `counterMode="Stop - Freeze counter"`.
+
 #### `getErrorsAndWarnings`
 *(19-tool list only)*
 - **Params:** none

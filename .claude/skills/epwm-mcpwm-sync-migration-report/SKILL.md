@@ -287,6 +287,11 @@ about how to handle a flagged cross-group sync relationship. Only continue
 into any follow-on configuration work once the user explicitly confirms the
 report and says to proceed.
 
+Once the user confirms, the next phase (creating the target MCPWM
+instances and setting up their time-base/synchronization per the confirmed
+grouping) is a separate skill: `epwm-mcpwm-instance-setup`. Hand off to it
+rather than open the target `.syscfg` file yourself from here.
+
 ## Reference material in this repository
 
 - `syscfg_mcp.md` -- full tool schemas and known limitations for the

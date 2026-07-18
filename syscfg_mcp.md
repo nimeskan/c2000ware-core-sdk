@@ -1,11 +1,11 @@
 # SysConfig MCP Server — Tool Reference
 
 This documents the **`sysconfig`** MCP server bundled with CCS 21's `ccs-ai`
-extension (one of four: `debug`, `project`, `sysconfig`, `serial`). Unlike
-the other three servers, this reference was captured by querying a
-**live, running instance** via `tools/list` — not from static analysis of
-the bundled JS — so it reflects exactly what the server reports about
-itself.
+extension (one of four: `debug`, `project`, `sysconfig`, `serial`). This
+reference was captured by querying a **live, running instance** directly
+via `tools/list` — including each tool's declared JSON Schema
+`inputSchema`/`outputSchema` — not from static analysis of the bundled JS,
+so it reflects exactly what the server reports about itself.
 
 See `ccs_headless_gui_and_mcp_walkthrough.md` for how to get a live CCS
 instance running headlessly and reach this server at all, and
@@ -92,251 +92,39 @@ The server's own system prompt (returned in the `initialize` response's
 > from the user's message or context), use `openFile` directly with that
 > path.
 
-### Practical consequence of this design
+### What actually happens (verified against a live server, not just the instructions text above)
 
-`tools/list` immediately after `initialize` only returns **4 tools**:
-`listFiles`, `openFile`, `closeFile`, `inspectExample`. The other 19 tools
-documented below **do not exist in the tool list until `openFile` has
-successfully opened a `.syscfg` file** — they are dynamically registered
-per-session, scoped to whichever file is currently open. Calling any of
-them before opening a file, or after `closeFile`, returns an error
-telling you to call `openFile` first.
+The instructions above claim only 4 tools exist until `openFile` is
+called. **That is not what was observed.** Two independent `tools/list`
+calls made immediately after `initialize`, with no `openFile` call first,
+both returned **all 23 tools already** — including `listModules`,
+`getInstanceConfiguration`, `changeConfiguration`, etc. Calling any of
+the file-scoped tools before a file is actually open returns a runtime
+error (e.g. `"No configuration file is open. Use 'listFiles' to see
+available files, then 'openFile' to select one."`), so the *description
+text* is right about behavior, just wrong about what shows up in
+`tools/list`.
 
----
+What genuinely does change after `openFile` succeeds: the tool list
+observed for this specific project (`epwm_ex3_synchronization`, device
+`F280013x`) **shrank from 23 to 19** — four pin/graphical-layout tools
+disappeared entirely:
 
-## Tool reference
+- `getInstanceConnections`
+- `manageConnections`
+- `getInstanceLayout`
+- `setInstancePositions`
 
-Total: **23 tools** (4 always available + 19 that appear after `openFile`).
-
-### Always available
-
-#### `listFiles`
-- **Params:** none
-- **Description:** Lists all `.syscfg` configuration files available in
-  the workspace. Indicates which file is currently selected. No file may
-  be selected initially or after calling `closeFile`. Each file contains
-  the configuration for its project and generates build artifacts (`.c`
-  and `.h` files).
-
-#### `openFile`
-- **Params:** `filePath` (required)
-- **Description:** Opens a `.syscfg` configuration file and loads the
-  appropriate SysConfig version for it. This must be called before using
-  configuration tools such as `listModules`, `getInstanceConfiguration`,
-  or `changeConfiguration`. If you know the file path, pass it directly
-  to this tool. If you need to discover available files, use `listFiles`
-  first. Returns instructions for how to use the configuration tools now
-  available (in `additionalInstructions`).
-
-  > **⚠️ Known headless limitation — see "Known limitation: first-time
-  > device-selection dialog" below.** The very first time a given
-  > `.syscfg` file is opened by *any* client (MCP or the GUI itself) in a
-  > CCS session, if the project's device ID isn't a fully specific part
-  > number, `openFile` **hangs indefinitely** waiting on a GUI modal
-  > dialog that a pure MCP client cannot answer. It is not a timing
-  > fluke — it reproduced identically across three separate attempts.
-
-#### `closeFile`
-- **Params:** none
-- **Description:** Closes the currently open file. Configuration tools
-  will no longer be available until another file is opened.
-
-#### `inspectExample`
-- **Params:** `fileName` (required), `force`
-- **Description:** Reads the configuration from an example `.syscfg` file
-  in the SDK. Use this for complex configuration tasks when you need
-  guidance on how to configure modules for specific use cases. Only
-  non-default values are returned — settings that match their initial
-  default are omitted. Each setting includes a `setByUser` boolean: true
-  means explicitly set by the user, false means automatically changed as
-  a side effect of other settings.
-
-### Available only after `openFile` — module discovery
-
-#### `listModules`
-- **Params:** none
-- **Description:** Returns a list of all available modules with a short
-  description of each. This list is fixed for the lifetime of the
-  session. Use `getModuleDescription` to get a more detailed description
-  for specific modules.
-
-#### `getModuleDescription`
-- **Params:** `moduleIds` (required)
-- **Description:** Returns detailed descriptions for one or more modules.
-  Descriptions are fixed for the lifetime of the session.
-
-#### `getModuleInstances`
-- **Params:** `moduleIds` (optional)
-- **Description:** Returns all module instances in the configuration,
-  optionally filtered to specific modules.
-
-#### `getInstanceConfiguration`
-- **Params:** `instances` (required), `changesOnly`, `ids`, `searchText`,
-  `includeDescriptions`, `includeChoices`
-- **Description:** Returns the detailed configuration for one or more
-  specific module instances, including configurables, pinmux settings,
-  child modules, and validation messages (errors/warnings). Efficient
-  usage pattern: first call with full details (`includeDescriptions:
-  true`), then use `changesOnly: true` with `includeDescriptions: false`
-  and `includeChoices: false` for subsequent status checks. Use `ids` to
-  query specific configurables, or `searchText` to explore/discover
-  configurables.
-
-### Available only after `openFile` — editing configuration
-
-#### `addModuleInstances`
-- **Params:** `moduleIds` (required), `maxConfigurables`
-- **Description:** Adds one or more instances of the specified modules
-  to the system configuration. Returns all created instances — both
-  directly requested and auto-created as dependencies — with identity,
-  relationship information, and `configurableCount`. Automatically
-  returns a lightweight representative configuration (`id`, `name`,
-  `value`, `choices`, `readOnly` — no descriptions) for each new module
-  type with `configurableCount` ≤ `maxConfigurables` (default 50). For
-  module types exceeding the threshold, use `configurableCount` from
-  `addedInstances` to estimate token cost (~30 tokens per configurable),
-  then call `getInstanceConfiguration` with `searchText` or `ids` filters.
-
-#### `removeModuleInstances`
-- **Params:** `instances` (required)
-- **Description:** Removes one or more module instances from the system
-  configuration. Returns all removed instances (including any removed as
-  side-effects) and any instances auto-created as a reaction. All arrays
-  are omitted when empty.
-
-#### `changeConfiguration`
-- **Params:** `changes` (required), `description` (required)
-- **Description:** Changes the values of one or more configurables
-  atomically — if any change fails, all are reverted. Returns a delta of
-  what changed: per-instance arrays of available/changed/unavailable
-  configurables, plus `addedInstances`/`removedInstances` for
-  module-level side-effects. All arrays are omitted when empty.
-
-#### `getErrorsAndWarnings`
-- **Params:** none
-- **Description:** Returns all error and warning messages across all
-  module instances. Each entry is a single message with the configurable
-  ID where it appears (when applicable). Module-level messages not
-  associated with a specific configurable omit `configurableId`. Use this
-  instead of `getInstanceConfiguration` when you only need error/warning
-  messages.
-
-#### `save`
-- **Params:** none
-- **Description:** Saves the current configuration to the `.syscfg` file
-  and regenerates all artifacts. Call this after making configuration
-  changes to persist them and update the generated artifacts. Returns the
-  saved `.syscfg` path, the list of generated artifacts, and any files
-  skipped due to configuration errors.
-
-### Available only after `openFile` — device migration
-
-#### `listMigrationTargets`
-- **Params:** `includeCompatibility` (optional)
-- **Description:** Lists all possible targets (device, package, variant)
-  that the current configuration could be migrated to (these fields are
-  simply absent if not available). Use this tool before performing a
-  migration to discover what the user can migrate to.
-
-#### `migrate`
-- **Params:** `device` (required), `package` (required), `variant`
-  (optional)
-- **Description:** Migrates the current device configuration to the
-  specified target device, package, and variant. Use
-  `listMigrationTargets` first to discover valid targets.
-
-### Available only after `openFile` — pin/connection graph
-
-#### `getInstanceConnections`
-- **Params:** `instances` (optional), `includeConnectionTypes` (optional)
-- **Description:** Returns the connection ports available on module
-  instances and their current connection state. Ports have types that
-  determine compatibility. Use the connection-types rules to understand
-  which port types can connect to each other.
-
-#### `manageConnections`
-- **Params:** `disconnect` (optional), `connect` (optional)
-- **Description:** Creates or removes connections between module
-  instance ports. This tool exclusively manages connections — it cannot
-  change configurable values or add/remove module instances. All
-  operations are applied atomically — if any fails, all are reverted.
-
-#### `getInstanceLayout`
-- **Params:** `instances` (optional)
-- **Description:** Returns the position and size of module instances in
-  the graphical view. Groups create isolated layout contexts: members of
-  a group have positions relative to their group's coordinate space,
-  while non-members and groups themselves share the top-level coordinate
-  space. When laying out, treat group members as a completely separate
-  graph from non-members.
-
-#### `setInstancePositions`
-- **Params:** `positions` (required)
-- **Description:** Sets the positions of module instances in the
-  graphical view. Group members and top-level instances occupy separate
-  coordinate spaces — see layout instructions for correct positioning
-  rules.
-
-### Available only after `openFile` — clock tree
-
-#### `getClockTreeInstances`
-- **Params:** `includeFilter` (optional), `excludeFilter` (optional),
-  `instances` (optional)
-- **Description:** Returns clock tree instances and their connection
-  topology.
-
-#### `traceClockSignal`
-- **Params:** `toInstance` (required), `toPin` (required)
-- **Description:** Traces backward from a specific pin to show the
-  complete signal path with frequencies. Returns a sequential list of
-  pins from the specified destination to the source. Adjacent pins with
-  the same frequency represent a connection (wire). When the same
-  instance appears with different frequencies on different pins, a
-  transformation occurred inside that instance.
-
-### Available only after `openFile` — generated output
-
-#### `listGeneratedArtifacts`
-- **Params:** none
-- **Description:** Lists all artifacts that will be generated based on
-  the current configuration. Artifacts are included only if the required
-  modules are present. Artifacts that would be generated but are blocked
-  by configuration errors are also indicated.
-
-#### `readGeneratedArtifact`
-- **Params:** `filePath` (required)
-- **Description:** Reads the contents of a specific generated artifact by
-  its file path.
-
----
-
-## Quick-reference table
-
-| Tool | Required params | Available before `openFile`? |
-|---|---|---|
-| `listFiles` | — | Yes |
-| `openFile` | `filePath` | Yes |
-| `closeFile` | — | Yes |
-| `inspectExample` | `fileName` | Yes |
-| `listModules` | — | No |
-| `getModuleDescription` | `moduleIds` | No |
-| `getModuleInstances` | — | No |
-| `getInstanceConfiguration` | `instances` | No |
-| `addModuleInstances` | `moduleIds` | No |
-| `removeModuleInstances` | `instances` | No |
-| `changeConfiguration` | `changes`, `description` | No |
-| `getErrorsAndWarnings` | — | No |
-| `save` | — | No |
-| `listMigrationTargets` | — | No |
-| `migrate` | `device`, `package` | No |
-| `getInstanceConnections` | — | No |
-| `manageConnections` | — | No |
-| `getInstanceLayout` | — | No |
-| `setInstancePositions` | `positions` | No |
-| `getClockTreeInstances` | — | No |
-| `traceClockSignal` | `toInstance`, `toPin` | No |
-| `listGeneratedArtifacts` | — | No |
-| `readGeneratedArtifact` | `filePath` | No |
+`openFile`'s own result includes a `validTools` array — the real,
+authoritative list of which tools are usable for that file's resolved
+SysConfig version. For this file it listed exactly those same 19 tools.
+The four missing ones are documented in `openFile`'s `outputSchema`
+description as being "for features not supported by this file's
+SysConfig version" — most plausibly the graphical pinmux/connection view,
+which may not apply to every device family. This wasn't tested against a
+device/file where those 4 tools *do* remain available, so treat "pin
+graph tools may disappear for some devices" as confirmed, but the exact
+condition that keeps them available as unconfirmed.
 
 ---
 
@@ -413,28 +201,11 @@ xdotool mousemove <x> <y> click 1                                     # click CO
 After that one-time click, calling `openFile` again for the **same
 file** — from a brand-new `mcp-server-proxy.js sysconfig` connection —
 completed successfully in **1.6 seconds**, returning the full
-`additionalInstructions` payload and expanding the tool list. A
-follow-up `getModuleInstances` call then returned genuine live data:
-
-```json
-{
-  "instances": [
-    {"moduleId": "/driverlib/epwm.js", "instances": [
-      {"moduleInstanceId": "myEPWM1", "configurableCount": 168},
-      {"moduleInstanceId": "myEPWM2", "configurableCount": 171},
-      {"moduleInstanceId": "myEPWM3", "configurableCount": 171},
-      {"moduleInstanceId": "myEPWM4", "configurableCount": 171}
-    ]},
-    {"moduleId": "/driverlib/sync.js", "instances": [
-      {"moduleInstanceId": "$static", "configurableCount": 5}
-    ]},
-    {"moduleId": "/driverlib/inputxbar_input.js", "instances": [
-      {"moduleInstanceId": "myINPUTXBARINPUT0", "configurableCount": 5},
-      {"moduleInstanceId": "myINPUTXBARINPUT1", "configurableCount": 5}
-    ]}
-  ]
-}
-```
+`additionalInstructions` payload and expanding the tool list. Every
+subsequent `openFile` call against that same file (even from further new
+connections) has stayed fast (~1.7s) since — confirmed across multiple
+follow-up calls including the `save` and `listModules` calls documented
+below.
 
 ### Practical implications
 
@@ -442,13 +213,13 @@ follow-up `getModuleInstances` call then returned genuine live data:
   resolved will hit this dialog exactly once. Projects built from
   `.projectspec` files with a concrete device ID (not a generic family
   name) may never trigger it at all — worth testing per-project.
-- **MCP session state is per-connection, not global.** Resolving the
-  dialog via the GUI, or via one MCP connection's `openFile` call, does
-  **not** carry over to a different MCP connection querying the same
-  file — each new `mcp-server-proxy.js sysconfig` process is its own
-  session against the backend and must independently call `openFile`
-  again (though it's fast once the device is already resolved for that
-  file).
+- **The resolution is per-file, not per-connection.** MCP session state
+  (which tools are registered, whether a file is "open") is
+  per-connection and does not persist across separate
+  `mcp-server-proxy.js sysconfig` invocations — each new connection must
+  call `openFile` again. But *device resolution* for a given file, once
+  settled, is remembered by the backend and makes every later `openFile`
+  call for that same file fast, regardless of which connection makes it.
 - **A pure MCP-only agent, with no GUI access, cannot get past this by
   itself** on a file hitting it for the first time. It needs either a
   human at the actual CCS window, or a GUI-automation layer (as
@@ -457,26 +228,431 @@ follow-up `getModuleInstances` call then returned genuine live data:
 
 ---
 
+## Tool reference
+
+All 23 tools, with full input/output schemas as declared by the live
+server itself (not inferred from example responses). Grouped by what
+they do; each heading notes whether the tool was present in the
+post-`openFile` (19-tool) list for the test file, or only in the
+pre-`openFile`/generic-connection-tools (23-tool) list.
+
+### File / session management
+
+#### `listFiles`
+*(available in both lists)*
+- **Params:** none
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `files` | array (required) | one entry per `.syscfg` in the workspace |
+  | `files[].filePath` | string (required) | absolute path |
+  | `files[].name` | string (required) | basename |
+  | `files[].selected` | boolean (required) | true if this is the currently-open file for this session |
+  | `files[].sysConfigVersion` | string (required) | SysConfig version required for this file |
+- **Description:** Lists all `.syscfg` configuration files available in
+  the workspace. Indicates which file is currently selected. No file may
+  be selected initially or after calling `closeFile`.
+
+#### `openFile`
+*(available in both lists)*
+- **Params:** `filePath` (string, required) — absolute path to the `.syscfg` file
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `additionalInstructions` | string (required) | workflow guidance for using the now-available tools |
+  | `validTools` | array of strings (required) | "When present, only these tools are valid to call for the opened file. Other tools visible in the tool list are for features not supported by this file's SysConfig version — calling them will fail." |
+- **Description:** Opens a `.syscfg` file and loads the appropriate
+  SysConfig version for it. Must be called before any file-scoped tool.
+
+  > **⚠️ See "Known limitation: first-time device-selection dialog"
+  > above.** The very first time a given `.syscfg` file is opened, if
+  > the project's device ID isn't a fully specific part number,
+  > `openFile` **hangs indefinitely** waiting on a GUI modal dialog that
+  > a pure MCP client cannot answer. Not a timing fluke — reproduced
+  > identically across three separate attempts.
+
+#### `closeFile`
+*(available in both lists)*
+- **Params:** none
+- **Returns:** no output schema declared (empty result)
+- **Description:** Closes the currently open file. File-scoped tools
+  stop working until another file is opened.
+
+#### `inspectExample`
+*(available in both lists)*
+- **Params:**
+  | Field | Type | Required |
+  |---|---|---|
+  | `fileName` | string | yes — absolute path to an example `.syscfg` in the SDK |
+  | `force` | boolean | no — force reading a file configured for a different device/board; without this, mismatched devices throw an error |
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `configuration` | array (required) | module instances found in the example file |
+  | `configuration[].moduleId` / `.moduleInstanceId` | string (required) | identity |
+  | `configuration[].configuration` | array (required) | the instance's non-default settings |
+  | `configuration[].commonSettingsAffectingAllInstances` | array (optional) | module-wide settings affecting every instance of that type |
+- **Description:** Reads configuration from an SDK example `.syscfg` for
+  guidance on complex configuration tasks. Only non-default values are
+  returned; each setting includes `setByUser` (true = explicit user
+  choice, false = automatic side effect).
+
+### Module discovery
+
+#### `listModules`
+*(19-tool list only)*
+- **Params:** none
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `modules` | array (required) | |
+  | `modules[].moduleId` | string (required) | |
+  | `modules[].moduleName` | string (required) | |
+  | `modules[].description` | string (optional) | |
+- **Description:** Lists all module types available for the currently
+  open file's device. Fixed for the session lifetime.
+
+#### `getModuleDescription`
+*(19-tool list only)*
+- **Params:** `moduleIds` (array of strings, required)
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `modules` | array (required) | |
+  | `modules[].moduleId` | string (required) | |
+  | `modules[].description` | string (required) | may be empty if none available |
+- **Description:** Detailed description per requested module ID.
+
+#### `getModuleInstances`
+*(19-tool list only)*
+- **Params:** `moduleIds` (array of strings, optional) — filter to specific modules
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `instances` | array (required) | grouped by module type |
+  | `instances[].moduleId` | string (required) | |
+  | `instances[].instances` | array (required) | the actual instances of this module type |
+  | `instances[].instances[].moduleInstanceId` | string (required) | |
+  | `instances[].instances[].instanceName` | string (required) | |
+  | `instances[].instances[].configurableCount` | number (required) | total configurables — for deciding whether to filter `getInstanceConfiguration` |
+  | `instances[].instances[].parentInstances` | array of `{moduleId, moduleInstanceId}` (optional, **omitted if empty**) | owning instance(s); multiple = shared ownership |
+  | `instances[].instances[].childInstances` | array of `{moduleId, moduleInstanceId}` (optional, **omitted if empty**) | owned instance(s) |
+- **Description:** All module instances currently in the configuration,
+  optionally filtered. This is the tool that actually reflects
+  project state — `listModules` does not.
+- **Live example** (from the `epwm_ex3_synchronization` project, after
+  `openFile`):
+  ```json
+  {
+    "instances": [
+      {"moduleId": "/driverlib/epwm.js", "instances": [
+        {"moduleInstanceId": "myEPWM1", "instanceName": "myEPWM1", "configurableCount": 168},
+        {"moduleInstanceId": "myEPWM2", "instanceName": "myEPWM2", "configurableCount": 171},
+        {"moduleInstanceId": "myEPWM3", "instanceName": "myEPWM3", "configurableCount": 171},
+        {"moduleInstanceId": "myEPWM4", "instanceName": "myEPWM4", "configurableCount": 171}
+      ]},
+      {"moduleId": "/driverlib/sync.js", "instances": [
+        {"moduleInstanceId": "$static", "instanceName": "staticInstance", "configurableCount": 5,
+         "parentInstances": [{"moduleId": "/driverlib/epwm.js", "moduleInstanceId": "$static"}]}
+      ]},
+      {"moduleId": "/driverlib/inputxbar_input.js", "instances": [
+        {"moduleInstanceId": "myINPUTXBARINPUT0", "instanceName": "myINPUTXBARINPUT0", "configurableCount": 5},
+        {"moduleInstanceId": "myINPUTXBARINPUT1", "instanceName": "myINPUTXBARINPUT1", "configurableCount": 5}
+      ]}
+    ]
+  }
+  ```
+  Note `parentInstances`/`childInstances` only appear on the `sync.js`
+  instance (it has a real parent); the EPWM and INPUTXBARINPUT instances
+  have neither field at all, since the schema says to omit them when
+  empty rather than send empty arrays.
+
+#### `getInstanceConfiguration`
+*(19-tool list only)*
+- **Params:**
+  | Field | Type | Required | Notes |
+  |---|---|---|---|
+  | `instances` | array of `{moduleId, moduleInstanceId}` | yes | which instances to inspect |
+  | `changesOnly` | boolean, default `false` | no | only modified configurables; adds `setByUser` per entry |
+  | `ids` | array of strings | no | exact configurable IDs, e.g. `['baudRate','parity']` |
+  | `searchText` | string | no | case-insensitive regex across names/descriptions/values/choices, e.g. `'clock\|frequency'` — searched even when descriptions/choices are excluded |
+  | `includeDescriptions` | boolean, default `true` | no | omit to save tokens |
+  | `includeChoices` | boolean, default `true` | no | omit to save tokens |
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `configuration` | array (required) | |
+  | `configuration[].moduleId` / `.moduleInstanceId` | string (required) | |
+  | `configuration[].configuration` | array (required) | the settings themselves |
+  | `configuration[].commonSettingsAffectingAllInstances` | array (optional) | module-wide settings shared across all instances of this type |
+- **Description:** Detailed configuration for specific instances —
+  configurables, pinmux, child modules, validation messages. The
+  server's own guidance: call once with full details, then use
+  `changesOnly: true` + no descriptions/choices for cheap re-checks.
+  Token cost estimate given in the server's instructions: roughly 30
+  tokens per configurable.
+
+### Editing configuration
+
+#### `addModuleInstances`
+*(19-tool list only)*
+- **Params:**
+  | Field | Type | Required | Notes |
+  |---|---|---|---|
+  | `moduleIds` | array of strings | yes | repeat an ID to add multiple instances of the same module |
+  | `maxConfigurables` | number, default `50` | no | ceiling for auto-including representative config; `0` disables it, `-1` always includes |
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `addedInstances` | array (required) | every instance created, including auto-created dependencies |
+  | `addedInstances[].moduleId` / `.moduleInstanceId` / `.instanceName` / `.configurableCount` | — | (all required) |
+  | `addedInstances[].wasDirectlyAdded` | boolean (required) | true = explicitly requested, false = auto-created dependency |
+  | `addedInstances[].parentInstances` | array (optional) | owning instance(s) |
+  | `configurationByModuleType` | array (optional) | one entry per requested module type, with a lightweight representative config (`id`, `name`, `value`, `choices`, `readOnly` — no descriptions) for types under the `maxConfigurables` threshold |
+- **Description:** Adds module instance(s), returning enough detail to
+  avoid an immediate follow-up `getInstanceConfiguration` call for small
+  modules.
+
+#### `removeModuleInstances`
+*(19-tool list only)*
+- **Params:** `instances` (array of `{moduleId, moduleInstanceId}`, required)
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `removedInstances` | array (required) | every instance removed, including side-effects |
+  | `addedInstances` | array (optional, omitted if none) | instances created as a *reaction* to the removal |
+- **Description:** Removes instance(s) and reports side-effects both ways.
+
+#### `changeConfiguration`
+*(19-tool list only)*
+- **Params:**
+  | Field | Type | Required | Notes |
+  |---|---|---|---|
+  | `changes` | array of `{moduleId, moduleInstanceId, configurable, value}` | yes | atomic — any failure reverts all |
+  | `changes[].value` | string \| number \| boolean \| string[] \| number[] \| `{moduleId, moduleInstanceId}` | yes | must match the type from `getInstanceConfiguration` |
+  | `description` | string | yes | shown in the UI undo history only — has no functional effect |
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `changes` | array (optional, omitted if nothing changed) | per-instance delta |
+  | `changes[].available` | array (optional) | configurables newly visible, full state |
+  | `changes[].changed` | array (optional) | configurables that changed — sparse, only the fields that actually changed |
+  | `changes[].unavailable` | array of strings (optional) | configurable IDs no longer visible |
+  | `addedInstances` / `removedInstances` | array (optional, omitted if none) | module-level side-effects |
+- **Description:** Atomic multi-configurable change with full delta
+  reporting, including cascading module add/remove side-effects.
+
+#### `getErrorsAndWarnings`
+*(19-tool list only)*
+- **Params:** none
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `summary` | array (required) | |
+  | `summary[].moduleId` / `.moduleInstanceId` | string (required) | |
+  | `summary[].type` | `"error"` \| `"warning"` (required) | |
+  | `summary[].message` | string (required) | |
+  | `summary[].configurableId` | string (optional) | omitted for module-level (non-configurable-specific) messages |
+- **Description:** All current validation errors/warnings, cheaper than
+  `getInstanceConfiguration` when that's all you need.
+
+#### `save`
+*(19-tool list only)*
+- **Params:** none
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `savedFile` | string (required) | path of the saved `.syscfg` |
+  | `generatedArtifacts` | array of strings (required) | paths of files written |
+  | `skippedArtifacts` | array of strings (optional) | files not generated due to config errors |
+  | `note` | string (optional) | present if generation wasn't possible/failed; the `.syscfg` itself still saves even if a generation error occurs |
+- **Description:** Persists to `.syscfg` and regenerates all build
+  artifacts.
+- **Live example** (from the `epwm_ex3_synchronization` project):
+  ```json
+  {
+    "savedFile": "/root/workspace_ccstheia/epwm_ex3_synchronization/epwm_ex3_synchronization.syscfg",
+    "generatedArtifacts": [
+      ".../CPU1_RAM/syscfg/migration.json", ".../board.c", ".../board.h",
+      ".../board.cmd.genlibs", ".../board.opt", ".../board.json",
+      ".../pinmux.csv", ".../epwm.dot", ".../c2000ware_libraries.cmd.genlibs",
+      ".../c2000ware_libraries.opt", ".../c2000ware_libraries.c",
+      ".../c2000ware_libraries.h", ".../clocktree.h"
+    ]
+  }
+  ```
+
+### Device migration
+
+#### `listMigrationTargets`
+*(19-tool list only)*
+- **Params:** `includeCompatibility` (boolean, default `false`) — server
+  warns this "can be slow for large device families i.e. 5 minutes" and
+  suggests confirming with the user first
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `targets` | array (required) | |
+  | `targets[].device` / `.package` / `.variant` | string (required) | |
+  | `targets[].properties` | object (optional) | e.g. price, package area, temp range, flash size — string or null values |
+  | `targets[].peripherals` | object (optional) | peripheral counts, e.g. `{"Number of UARTs": 3}` |
+  | `targets[].compatibility` | array (optional, only with `includeCompatibility: true`) | `status` (`compatible`\|`loading`\|`missing_functionality`\|`adjustments_needed`\|`no_pinmux`\|`error`\|`warning`\|`disabled`) + `issues` (string array) |
+- **Description:** Valid migration targets for the currently open config.
+
+#### `migrate`
+*(19-tool list only)*
+- **Params:** `device` (string, required), `package` (string, required),
+  `variant` (string, optional — omit if the target has only one)
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `migratedTo` | object `{device, package, variant}` (required) | |
+  | `errorsAndWarnings` | array (required) | same shape as `getErrorsAndWarnings`, post-migration |
+- **Description:** Performs the migration. Use `listMigrationTargets` first.
+
+### Pin/connection graph
+
+#### `getInstanceConnections`
+*(23-tool list only — absent once this test file's `openFile` narrowed the list to 19)*
+- **Params:**
+  | Field | Type | Required | Notes |
+  |---|---|---|---|
+  | `instances` | array of `{moduleId, moduleInstanceId}` | no | omit for all instances with ≥1 port |
+  | `includeConnectionTypes` | boolean, default `false` | no | fetch global type-compatibility rules once, omit on later calls |
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `instances` | array (required) | |
+  | `instances[].ports` | array | each port: `portId`, `portName`, `type`, `allowMultipleConnections`, `connections[]` (each with `moduleId`, `moduleInstanceId`, `portId`, `readOnly`) |
+  | `connectionTypes` | array (optional, only with `includeConnectionTypes: true`) | `{start, end}` pairs — a connection from a `start`-type port to an `end`-type port is valid |
+- **Description:** Ports and current connection state per instance.
+
+#### `manageConnections`
+*(23-tool list only)*
+- **Params:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `disconnect` | array of `{sourceModuleId, sourceInstanceId, sourcePortId, targetModuleId, targetInstanceId, targetPortId}` (optional) | connections to remove |
+  | `connect` | array, same shape (optional) | connections to create; typically source=output port, target=input port |
+- **Returns:** no output schema declared
+- **Description:** Atomic connect/disconnect — cannot touch configurable
+  values or add/remove instances.
+
+#### `getInstanceLayout`
+*(23-tool list only)*
+- **Params:** `instances` (array of `{moduleId, moduleInstanceId}`, optional) — omit for all positioned instances
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `instances[].position` | `[x, y]` (optional) | undefined if the instance has no position |
+  | `instances[].size` | `[width, height]` (optional) | undefined if no size |
+  | `instances[].memberContentsRestrictedTo` | `[width, height]` (optional) | groups only — bounds of the isolated coordinate space for group members |
+- **Description:** Graphical-view positions/sizes. Groups have their own
+  isolated coordinate space, separate from top-level instances.
+
+#### `setInstancePositions`
+*(23-tool list only)*
+- **Params:** `positions` (array of `{moduleId, moduleInstanceId, position: [x,y]}`, required)
+- **Returns:** no output schema declared
+- **Description:** Sets graphical-view positions. Group members and
+  top-level instances use separate coordinate spaces.
+
+### Clock tree
+
+#### `getClockTreeInstances`
+*(19-tool list only)*
+- **Params:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `includeFilter` | string (regex, optional) | only names matching |
+  | `excludeFilter` | string (regex, optional) | exclude names matching |
+  | `instances` | array of strings (optional) | exact instance names only |
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `instances[].name` / `.moduleId` / `.moduleInstanceId` | string (required) | |
+  | `instances[].type` | string (required) | `Divider`, `Mux`, `Multiplier`, `Oscillator`, `Gate`, or `Adder` |
+  | `instances[].inPins[]` | — | `name` + `connectedFrom {instanceName, pinName}` (all input pins are connected — required) |
+  | `instances[].outPins[]` | — | `name` + `connectedTo[] {instanceName, pinName}` (non-empty — every output feeds at least one input) |
+- **Description:** Clock tree topology. Instances/connections are fixed
+  hardware — only configurables on them are adjustable (via
+  `changeConfiguration`).
+
+#### `traceClockSignal`
+*(19-tool list only)*
+- **Params:** `toInstance` (string, required), `toPin` (string, required — input or output pin)
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `signalPath` | array (required) | ordered source-last; first element is the queried pin |
+  | `signalPath[].instance` / `.pin` / `.type` / `.moduleId` / `.moduleInstanceId` / `.frequency` | — | all required; `type` is one of `Oscillator`/`Divider`/`Mux`/`Multiplier`/`Gate`/`Adder`; `frequency` is a display string like `"48 MHz"` or a range `"32 - 48 MHz"` |
+- **Description:** Backward trace from a pin to its source, showing the
+  frequency at each hop. Same instance appearing at different
+  frequencies on different pins = a transformation happened inside it.
+
+### Generated output
+
+#### `listGeneratedArtifacts`
+*(19-tool list only)*
+- **Params:** none
+- **Returns:**
+  | Field | Type | Notes |
+  |---|---|---|
+  | `artifacts` | array (required) | |
+  | `artifacts[].filePath` | string (required) | |
+  | `artifacts[].blockedByErrors` | boolean (optional) | true if it would be generated but config errors block it |
+  | `note` | string (optional) | present if generation wasn't possible, e.g. no `--output` specified |
+- **Description:** What files the current configuration will produce.
+
+#### `readGeneratedArtifact`
+*(19-tool list only)*
+- **Params:** `filePath` (string, required — from `listGeneratedArtifacts`)
+- **Returns:** `content` (string, required) — the file's current contents
+- **Description:** Reads one generated artifact.
+
+---
+
+## Verified live workflow (this session)
+
+The following sequence was run end-to-end against a real CCS instance
+and the `epwm_ex3_synchronization` project (`driverlib/f280013x/examples/
+epwm/CCS/epwm_ex3_synchronization.projectspec`, imported and built via
+the `project` MCP server first — see `ccs_headless_gui_and_mcp_walkthrough.md`):
+
+1. `openFile` on `epwm_ex3_synchronization.syscfg` — hung on first-ever
+   attempt (device-selection dialog, see above); after resolving that
+   once via the GUI, subsequent `openFile` calls for this file completed
+   in ~1.6–1.7 seconds from brand-new connections.
+2. `getModuleInstances` (no filter) — returned the real instance graph:
+   4 EPWM instances (168–171 configurables each), 1 SYNC static instance
+   (5 configurables, parented to EPWM), 2 INPUTXBARINPUT instances (5
+   configurables each).
+3. `listModules` — returned all 47 module types available for this
+   device (`F280013x`), spanning driverlib peripherals, board components
+   (LED/SWITCH), utilities (DCSM, CMD), and libraries (FATFS, HRPWM SFO,
+   DCL control blocks, IQmath, FFT/Filter/Vector, and BETA data-transfer
+   tools).
+4. `save` — persisted the (unmodified) configuration and regenerated all
+   13 build artifacts successfully.
+
+---
+
 ## How this was captured
 
-A persistent Node.js child-process client (see
-`ccs_headless_gui_and_mcp_walkthrough.md` §7.2 for the pattern) sent a
-real `initialize` → `notifications/initialized` → `tools/list` sequence
-to `mcp-server-proxy.js sysconfig` while a live CCS instance was running,
-and the exact JSON response was parsed to produce this document.
+Two things were queried directly against a live, running CCS instance
+using a persistent Node.js child-process client (see
+`ccs_headless_gui_and_mcp_walkthrough.md` §7.2 for the pattern):
 
-**Discrepancy worth flagging:** the server's own `initialize` instructions
-(quoted above) explicitly state that only `listFiles`/`openFile`/
-`closeFile`/`inspectExample` are available until a `.syscfg` file is
-opened, and that the rest are "dynamically added" afterward. In practice,
-the single `tools/list` call in this session — made without ever calling
-`openFile` first — returned **all 23 tools already**, including
-`listModules`, `getInstanceConfiguration`, `changeConfiguration`, etc.
-This may mean the tool *list* is static from server start (openFile only
-gates whether calling them *succeeds*, not whether they're listed), or
-that some prior state in this CCS instance left a file already
-associated with the session. This was not independently re-tested against
-a freshly-started server with zero prior activity, so treat the
-"available before `openFile`?" column above as documented intent from the
-server's own instructions, not as independently confirmed behavior for
-every tool.
+1. `tools/list` **before** ever calling `openFile` — done twice,
+   independently, both returning the same 23 tools with full
+   `inputSchema`/`outputSchema` for each.
+2. `tools/list` **after** a successful `openFile` for the
+   `epwm_ex3_synchronization.syscfg` file — returning 19 tools (the same
+   23 minus the 4 pin/layout tools listed above), again with full
+   schemas.
+
+Every `inputSchema`/`outputSchema` field documented above is copied
+directly from those two captures, not inferred from example responses.
+Live example payloads (marked "Live example" above) are additionally
+copied verbatim from real `tools/call` responses made during this
+session.

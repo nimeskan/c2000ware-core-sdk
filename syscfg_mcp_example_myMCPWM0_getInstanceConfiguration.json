@@ -1,0 +1,1415 @@
+{
+  "configuration": [
+    {
+      "moduleId": "/driverlib/mcpwm.js",
+      "moduleInstanceId": "myMCPWM0",
+      "configuration": [
+        {
+          "id": "$name",
+          "name": "Name",
+          "value": "myMCPWM0"
+        },
+        {
+          "id": "mcpwm_useShdwRegForCodeGen",
+          "name": "Generated Code Uses Shadow Registers",
+          "value": true,
+          "description": "Generated Code Uses Shadow Registers for updating"
+        },
+        {
+          "id": "copyUse",
+          "name": "Use Copy Feature",
+          "value": false,
+          "description": ""
+        },
+        {
+          "id": "generateCodeTemplate",
+          "name": "Generate Code Template",
+          "value": false,
+          "description": "Enable the template code generation"
+        },
+        {
+          "id": "codeTemplateName",
+          "name": "Code Template Name",
+          "value": "mcpwmConfigurationTemplate",
+          "description": "The name of the code template generated for this MCPWM configuration"
+        },
+        {
+          "id": "mcpwmGlobalLoad_gld",
+          "name": "Enable Global Shadow to Active Load",
+          "value": false,
+          "description": "all the shadow to active reload events are defined by GLDMODE bits in GLDCTL register"
+        },
+        {
+          "id": "mcpwmTimebase_emulationMode",
+          "name": "Emulation Mode",
+          "value": "Stop after next Time Base counter increment or decrement",
+          "choices": [
+            "Stop after next Time Base counter increment or decrement",
+            "Stop when counter completes whole cycle",
+            "Free run"
+          ],
+          "description": "Behavior of the ePWM time-base counter during emulation events"
+        },
+        {
+          "id": "mcpwmTimebase_clockDiv",
+          "name": "Time Base Clock Divider",
+          "value": "Divide clock by 1",
+          "choices": [
+            "Divide clock by 1",
+            "Divide clock by 2",
+            "Divide clock by 4",
+            "Divide clock by 8",
+            "Divide clock by 16",
+            "Divide clock by 32",
+            "Divide clock by 64",
+            "Divide clock by 128",
+            "Divide clock by 256",
+            "Divide clock by 512",
+            "Divide clock by 1024",
+            "Divide clock by 2048",
+            "Divide clock by 4096",
+            "Divide clock by 8192",
+            "Divide clock by 16384",
+            "Divide clock by 32768"
+          ],
+          "description": "CLKDIV: These bits select the time base clock pre-scale value, TBCLK = EPWMCLK/(HSPCLKDIV*CLKDIV)",
+          "infos": [
+            "For perfectly synchronized TBCLKs across multiple MCPWM modules, the prescaler bits in the TBCTL register of each MCPWM module must be set identically"
+          ]
+        },
+        {
+          "id": "mcpwmTimebase_periodLoadMode",
+          "name": "Time Base Period Load Mode",
+          "value": "PWM Active Period register loads from Shadow register at TBCTR=0 event",
+          "choices": [
+            "PWM Active Period register loads from Shadow register at TBCTR=0 event",
+            "PWM Period register load from Shadow register is disabled"
+          ],
+          "description": "Period load mode for the Time Base Counter Submodule"
+        },
+        {
+          "id": "mcpwmTimebase_period",
+          "name": "Time Base Period",
+          "value": 15999,
+          "description": "Period for the Time Base Counter Submodule"
+        },
+        {
+          "id": "mcpwmTimebase_counterMode",
+          "name": "Counter Mode",
+          "value": "Up - count mode",
+          "choices": [
+            "Up - count mode",
+            "Up - down - count mode",
+            "Stop - Freeze counter"
+          ],
+          "description": "Mode of the Counter value for the Time Base Counter Submodule"
+        },
+        {
+          "id": "mcpwmTimebase_phaseEnable",
+          "name": "Enable Phase Shift Load",
+          "value": true,
+          "description": "Enable phase shift load for the Time Base Counter Submodule"
+        },
+        {
+          "id": "mcpwmTimebase_phaseShift",
+          "name": "Phase Shift Value",
+          "value": 0,
+          "description": "Phase Shift Value for the Time Base Counter Submodule"
+        },
+        {
+          "id": "mcpwmTimebase_forceSyncPulse",
+          "name": "Force a Sync Pulse",
+          "value": false,
+          "description": "Force a sync pulse for the Time Base Counter Submodule"
+        },
+        {
+          "id": "mcpwmTimebase_syncInPulseSource",
+          "name": "Sync In Pulse Source",
+          "value": "Sync-in source is Input XBAR out5 signal",
+          "choices": [
+            "Disable Sync-in",
+            "Sync-in source is Input XBAR out5 signal",
+            "Sync-in source is Input XBAR out6 signal",
+            "Sync-in source is ECAP1 sync-out signal",
+            "Sync-in source is MCPWM1 sync-out signal",
+            "Sync-in source is MCPWM3 sync-out signal"
+          ],
+          "description": "Sync in Pulse for the Time Base Counter Submodule"
+        },
+        {
+          "id": "mcpwmTimebase_syncOutPulseMode",
+          "name": "Sync Out Pulse",
+          "value": "Sync pulse is generated when time base counter equals zero",
+          "choices": [
+            "Sync pulse is generated by software",
+            "Sync pulse is generated when time base counter equals zero",
+            "Sync pulse is generated when time base counter equals compare C value",
+            "Sync pulse is generated when time base counter equals compare D value",
+            "Sync pulse is disabled"
+          ],
+          "description": "Sync Out Pulse for the Time Base Counter Submodule"
+        },
+        {
+          "id": "hrpwm_syncSource",
+          "name": "MCPWMxSYNCPER Source Select",
+          "value": "Sync Peripheral Signal Pulse is disabled",
+          "choices": [
+            "Sync Peripheral Signal Pulse is disabled",
+            "Sync Peripheral Signal Pulse is generated when time base counter equals Period",
+            "Sync Peripheral Signal Pulse is generated when time base counter equals zero",
+            "Sync Peripheral Signal Pulse is generated when time base counter equals compare C value while counting up",
+            "Sync Peripheral Signal Pulse is generated when time base counter equals compare C value while counting down",
+            "Sync Peripheral Signal Pulse is generated when time base counter equals compare D value while counting up",
+            "Sync Peripheral Signal Pulse is generated when time base counter equals compare D value while counting down"
+          ],
+          "description": "Selects the source of the MCPWMSYNCPER signal that goes to the CMPSS and GPDAC"
+        },
+        {
+          "id": "mcpwmCounterCompare_cmpA",
+          "name": "Counter Compare A (CMPA)",
+          "value": 7999,
+          "description": "Counter Compare A (CMPA) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_enableShadowLoadModeCMPA",
+          "name": "Enable Shadow Counter Compare A (CMPA)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare A (CMPA) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_shadowLoadModeCMPA",
+          "name": "Counter Compare A Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": "Counter Compare A Shadow Load Event"
+        },
+        {
+          "id": "mcpwmCounterCompare_cmpB",
+          "name": "Counter Compare B (CMPB)",
+          "value": 7999,
+          "description": "Counter Compare B (CMPB) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_enableShadowLoadModeCMPB",
+          "name": "Enable Shadow Counter Compare B (CMPB)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare B (CMPB) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_shadowLoadModeCMPB",
+          "name": "Counter Compare B Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": "Counter Compare B Shadow Load Event"
+        },
+        {
+          "id": "mcpwmCounterCompare_cmpA_pwm2",
+          "name": "Counter Compare A (CMPA)",
+          "value": 0,
+          "description": "Counter Compare A (CMPA) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_enableShadowLoadModeCMPA_pwm2",
+          "name": "Enable Shadow Counter Compare A (CMPA)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare A (CMPA) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_shadowLoadModeCMPA_pwm2",
+          "name": "Counter Compare A Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": "Counter Compare A Shadow Load Event"
+        },
+        {
+          "id": "mcpwmCounterCompare_cmpB_pwm2",
+          "name": "Counter Compare A (CMPB)",
+          "value": 0,
+          "description": "Counter Compare A (CMPB) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_enableShadowLoadModeCMPB_pwm2",
+          "name": "Enable Shadow Counter Compare A (CMPB)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare A (CMPB) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_shadowLoadModeCMPB_pwm2",
+          "name": "Counter Compare B Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": "Counter Compare B Shadow Load Event"
+        },
+        {
+          "id": "mcpwmCounterCompare_cmpA_pwm3",
+          "name": "Counter Compare A (CMPA)",
+          "value": 0,
+          "description": "Counter Compare A (CMPA) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_enableShadowLoadModeCMPA_pwm3",
+          "name": "Enable Shadow Counter Compare A (CMPA)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare A (CMPA) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_shadowLoadModeCMPA_pwm3",
+          "name": "Counter Compare A Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": "Counter Compare A Shadow Load Event"
+        },
+        {
+          "id": "mcpwmCounterCompare_cmpB_pwm3",
+          "name": "Counter Compare A (CMPB)",
+          "value": 0,
+          "description": "Counter Compare A (CMPB) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_enableShadowLoadModeCMPB_pwm3",
+          "name": "Enable Shadow Counter Compare A (CMPB)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare A (CMPB) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_shadowLoadModeCMPB_pwm3",
+          "name": "Counter Compare B Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": "Counter Compare B Shadow Load Event"
+        },
+        {
+          "id": "mcpwmCounterCompare_cmpC",
+          "name": "Counter Compare C (CMPC)",
+          "value": 0,
+          "description": "Counter Compare C (CMPC) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_enableShadowLoadModeCMPC",
+          "name": "Enable Shadow Counter Compare C (CMPC)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare C (CMPC) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_shadowLoadModeCMPC",
+          "name": "Counter Compare C Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": "Counter Compare C Shadow Load Event"
+        },
+        {
+          "id": "mcpwmCounterCompare_cmpD",
+          "name": "Counter Compare D (CMPD)",
+          "value": 0,
+          "description": "Counter Compare D (CMPD) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_enableShadowLoadModeCMPD",
+          "name": "Enable Shadow Counter Compare D (CMPD)",
+          "value": true,
+          "description": "Enable Shadow Counter Compare D (CMPD) value"
+        },
+        {
+          "id": "mcpwmCounterCompare_shadowLoadModeCMPD",
+          "name": "Counter Compare D Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": "Counter Compare D Shadow Load Event"
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1A_shadowMode",
+          "name": "MCPWMx1A Shadow Mode Enable",
+          "value": true,
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1A_shadowEvent",
+          "name": "MCPWMx1A Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1A_SWAForcection",
+          "name": "Software Force Action",
+          "value": "SW force Action is disabled",
+          "choices": [
+            "SW force Action is disabled",
+            "Set output pins to continuos low",
+            "Set output pins to continuos High",
+            "Set output to low when one shot is triggered",
+            "Set output to high when one shot is triggered",
+            "Toggle output when one shot is triggered"
+          ]
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1A_ON_TIMEBASE_ZERO",
+          "name": "MCPWMx1A  Time base counter equals zero",
+          "value": "Set output pins to High",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1A_ON_TIMEBASE_PERIOD",
+          "name": "MCPWMx1A  Time base counter equals period",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1A_ON_TIMEBASE_UP_CMPA",
+          "name": "MCPWMx1A  Time base counter up equals CMPA",
+          "value": "Set output pins to low",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1A_ON_TIMEBASE_DOWN_CMPA",
+          "name": "MCPWMx1A  Time base counter down equals CMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1A_ON_TIMEBASE_UP_CMPB",
+          "name": "MCPWMx1A  Time base counter up equals CMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1A_ON_TIMEBASE_DOWN_CMPB",
+          "name": "MCPWMx1A  Time base counter down equals CMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1B_shadowMode",
+          "name": "MCPWMx1B Shadow Mode Enable",
+          "value": true,
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1B_shadowEvent",
+          "name": "MCPWMx1B Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1B_SWAForcection",
+          "name": "Software Force Action",
+          "value": "SW force Action is disabled",
+          "choices": [
+            "SW force Action is disabled",
+            "Set output pins to continuos low",
+            "Set output pins to continuos High",
+            "Set output to low when one shot is triggered",
+            "Set output to high when one shot is triggered",
+            "Toggle output when one shot is triggered"
+          ]
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1B_ON_TIMEBASE_ZERO",
+          "name": "MCPWMx1B  Time base counter equals zero",
+          "value": "Set output pins to High",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1B_ON_TIMEBASE_PERIOD",
+          "name": "MCPWMx1B  Time base counter equals period",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1B_ON_TIMEBASE_UP_CMPA",
+          "name": "MCPWMx1B  Time base counter up equals CMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1B_ON_TIMEBASE_DOWN_CMPA",
+          "name": "MCPWMx1B  Time base counter down equals CMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1B_ON_TIMEBASE_UP_CMPB",
+          "name": "MCPWMx1B  Time base counter up equals CMPB",
+          "value": "Set output pins to low",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_1B_ON_TIMEBASE_DOWN_CMPB",
+          "name": "MCPWMx1B  Time base counter down equals CMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2A_shadowMode",
+          "name": "MCPWMx2A Shadow Mode Enable",
+          "value": true,
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2A_shadowEvent",
+          "name": "MCPWMx2A Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2A_SWAForcection",
+          "name": "Software Force Action",
+          "value": "SW force Action is disabled",
+          "choices": [
+            "SW force Action is disabled",
+            "Set output pins to continuos low",
+            "Set output pins to continuos High",
+            "Set output to low when one shot is triggered",
+            "Set output to high when one shot is triggered",
+            "Toggle output when one shot is triggered"
+          ]
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2A_ON_TIMEBASE_ZERO",
+          "name": "MCPWMx2A  Time base counter equals zero",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2A_ON_TIMEBASE_PERIOD",
+          "name": "MCPWMx2A  Time base counter equals period",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2A_ON_TIMEBASE_UP_CMPA",
+          "name": "MCPWMx2A  Time base counter up equals CMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2A_ON_TIMEBASE_DOWN_CMPA",
+          "name": "MCPWMx2A  Time base counter down equals CMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2A_ON_TIMEBASE_UP_CMPB",
+          "name": "MCPWMx2A  Time base counter up equals CMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2A_ON_TIMEBASE_DOWN_CMPB",
+          "name": "MCPWMx2A  Time base counter down equals CMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2B_shadowMode",
+          "name": "MCPWMx2B Shadow Mode Enable",
+          "value": true,
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2B_shadowEvent",
+          "name": "MCPWMx2B Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2B_SWAForcection",
+          "name": "Software Force Action",
+          "value": "SW force Action is disabled",
+          "choices": [
+            "SW force Action is disabled",
+            "Set output pins to continuos low",
+            "Set output pins to continuos High",
+            "Set output to low when one shot is triggered",
+            "Set output to high when one shot is triggered",
+            "Toggle output when one shot is triggered"
+          ]
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2B_ON_TIMEBASE_ZERO",
+          "name": "MCPWMx2B  Time base counter equals zero",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2B_ON_TIMEBASE_PERIOD",
+          "name": "MCPWMx2B  Time base counter equals period",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2B_ON_TIMEBASE_UP_CMPA",
+          "name": "MCPWMx2B  Time base counter up equals CMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2B_ON_TIMEBASE_DOWN_CMPA",
+          "name": "MCPWMx2B  Time base counter down equals CMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2B_ON_TIMEBASE_UP_CMPB",
+          "name": "MCPWMx2B  Time base counter up equals CMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_2B_ON_TIMEBASE_DOWN_CMPB",
+          "name": "MCPWMx2B  Time base counter down equals CMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3A_shadowMode",
+          "name": "MCPWMx3A Shadow Mode Enable",
+          "value": true,
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3A_shadowEvent",
+          "name": "MCPWMx3A Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3A_SWAForcection",
+          "name": "Software Force Action",
+          "value": "SW force Action is disabled",
+          "choices": [
+            "SW force Action is disabled",
+            "Set output pins to continuos low",
+            "Set output pins to continuos High",
+            "Set output to low when one shot is triggered",
+            "Set output to high when one shot is triggered",
+            "Toggle output when one shot is triggered"
+          ]
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3A_ON_TIMEBASE_ZERO",
+          "name": "MCPWMx3A  Time base counter equals zero",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3A_ON_TIMEBASE_PERIOD",
+          "name": "MCPWMx3A  Time base counter equals period",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3A_ON_TIMEBASE_UP_CMPA",
+          "name": "MCPWMx3A  Time base counter up equals CMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3A_ON_TIMEBASE_DOWN_CMPA",
+          "name": "MCPWMx3A  Time base counter down equals CMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3A_ON_TIMEBASE_UP_CMPB",
+          "name": "MCPWMx3A  Time base counter up equals CMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3A_ON_TIMEBASE_DOWN_CMPB",
+          "name": "MCPWMx3A  Time base counter down equals CMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3B_shadowMode",
+          "name": "MCPWMx3B Shadow Mode Enable",
+          "value": true,
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3B_shadowEvent",
+          "name": "MCPWMx3B Shadow Load Event",
+          "value": "Load when counter equals zero",
+          "choices": [
+            "Load when counter equals zero",
+            "Load when counter equals period",
+            "Load when counter equals zero or period",
+            "Freeze shadow to active load"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3B_SWAForcection",
+          "name": "Software Force Action",
+          "value": "SW force Action is disabled",
+          "choices": [
+            "SW force Action is disabled",
+            "Set output pins to continuos low",
+            "Set output pins to continuos High",
+            "Set output to low when one shot is triggered",
+            "Set output to high when one shot is triggered",
+            "Toggle output when one shot is triggered"
+          ]
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3B_ON_TIMEBASE_ZERO",
+          "name": "MCPWMx3B  Time base counter equals zero",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3B_ON_TIMEBASE_PERIOD",
+          "name": "MCPWMx3B  Time base counter equals period",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3B_ON_TIMEBASE_UP_CMPA",
+          "name": "MCPWMx3B  Time base counter up equals CMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3B_ON_TIMEBASE_DOWN_CMPA",
+          "name": "MCPWMx3B  Time base counter down equals CMPA",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3B_ON_TIMEBASE_UP_CMPB",
+          "name": "MCPWMx3B  Time base counter up equals CMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "mcpwmActionQualifier_MCPWM_AQ_OUTPUT_3B_ON_TIMEBASE_DOWN_CMPB",
+          "name": "MCPWMx3B  Time base counter down equals CMPB",
+          "value": "No change in the output pins",
+          "choices": [
+            "No change in the output pins",
+            "Set output pins to low",
+            "Set output pins to High",
+            "Toggle the output pins"
+          ],
+          "description": ""
+        },
+        {
+          "id": "AH",
+          "name": "Active High",
+          "description": ""
+        },
+        {
+          "id": "AL",
+          "name": "Active Low",
+          "description": ""
+        },
+        {
+          "id": "AHC",
+          "name": "Active High Complementary",
+          "description": ""
+        },
+        {
+          "id": "ALC",
+          "name": "Active Low Complementary",
+          "description": ""
+        },
+        {
+          "id": "DUAL",
+          "name": "Dual Edge Delay Mode",
+          "description": ""
+        },
+        {
+          "id": "mcpwmDeadband_inputRED",
+          "name": "Rising Edge Delay Input",
+          "value": "Input signal is MCPWMA",
+          "choices": [
+            "Input signal is MCPWMA",
+            "Input signal is MCPWMB"
+          ],
+          "description": "Select the source for DBRED (Rising Edge Delay)"
+        },
+        {
+          "id": "mcpwmDeadband_inputFED",
+          "name": "Falling Edge Delay Input",
+          "value": "Input signal is MCPWMA",
+          "choices": [
+            "Input signal is MCPWMA",
+            "Input signal is MCPWMB",
+            "Input signal is the output of Rising Edge delay"
+          ],
+          "description": "Select the source for DBFED (Falling Edge Delay)"
+        },
+        {
+          "id": "mcpwmDeadband_polarityRED",
+          "name": "Rising Edge Delay Polarity",
+          "value": "DB polarity is not inverted",
+          "choices": [
+            "DB polarity is not inverted",
+            "DB polarity is inverted"
+          ],
+          "description": "Whether or not to invert RED (Rising Edge Delay)"
+        },
+        {
+          "id": "mcpwmDeadband_polarityFED",
+          "name": "Falling Edge Delay Polarity",
+          "value": "DB polarity is not inverted",
+          "choices": [
+            "DB polarity is not inverted",
+            "DB polarity is inverted"
+          ],
+          "description": "Whether or not to invert FED (Falling Edge Delay)"
+        },
+        {
+          "id": "mcpwmDeadband_enableRED",
+          "name": "Enable Rising Edge Delay",
+          "value": false,
+          "description": "Enable DBRED (Rising Edge Delay) by choosing it as the source for the A path"
+        },
+        {
+          "id": "mcpwmDeadband_redShadowMode",
+          "name": "Enable RED Shadow Mode",
+          "value": true,
+          "description": "Enable shadowing of the RED (Rising Edge Delay) register.",
+          "infos": [
+            "When DBRED/DBFED active is loaded with a new shadow value while DB counters are counting, the new DBRED / DBFED value only affects the NEXT PWMx edge and not the current edge."
+          ]
+        },
+        {
+          "id": "mcpwmDeadband_delayRED",
+          "name": "Rising Edge Delay Value",
+          "value": 0,
+          "description": "DBRED (Rising Edge Delay) delay value"
+        },
+        {
+          "id": "mcpwmDeadband_enableFED",
+          "name": "Enable Falling Edge Delay",
+          "value": false,
+          "description": "Enable DBFED (Falling Edge Delay) by choosing it as the source for the B path"
+        },
+        {
+          "id": "mcpwmDeadband_fedShadowMode",
+          "name": "Enable FED Shadow Mode",
+          "value": true,
+          "description": "Enable shadowing of the FED (Falling Edge Delay) register.",
+          "infos": [
+            "When DBRED/DBFED active is loaded with a new shadow value while DB counters are counting, the new DBRED / DBFED value only affects the NEXT PWMx edge and not the current edge."
+          ]
+        },
+        {
+          "id": "mcpwmDeadband_delayFED",
+          "name": "Falling Edge Delay Value",
+          "value": 0,
+          "description": "DBFED (Falling Edge Delay) delay value"
+        },
+        {
+          "id": "mcpwmDeadband_outputSwapOutA",
+          "name": "Swap Output for MCPWMxA",
+          "value": false,
+          "description": "Check to enable output swap. Channel A path to Out B."
+        },
+        {
+          "id": "mcpwmDeadband_outputSwapOutB",
+          "name": "Swap Output for MCPWMxB",
+          "value": false,
+          "description": "Check to enable output swap. Channel B path to Out A."
+        },
+        {
+          "id": "mcpwmTripZone_MCPWM_TZ_ACTION_EVENT_TZA",
+          "name": "TZA Event",
+          "value": "High impedance output",
+          "choices": [
+            "High impedance output",
+            "High voltage state",
+            "Low voltage state",
+            "Disable action"
+          ],
+          "description": "The action to take on MCPWM_TZ_ACTION_EVENT_TZA. (TZ1 - TZ8)"
+        },
+        {
+          "id": "mcpwmTripZone_MCPWM_TZ_ACTION_EVENT_TZB",
+          "name": "TZB Event",
+          "value": "High impedance output",
+          "choices": [
+            "High impedance output",
+            "High voltage state",
+            "Low voltage state",
+            "Disable action"
+          ],
+          "description": "The action to take on MCPWM_TZ_ACTION_EVENT_TZB. (TZ1 - TZ8)"
+        },
+        {
+          "id": "mcpwmTripZone_oneShotSource",
+          "name": "One-Shot Source",
+          "value": [],
+          "choices": [
+            "One-shot TZ1",
+            "One-shot TZ2",
+            "One-shot TZ3",
+            "One-shot TZ4",
+            "One-shot TZ5",
+            "One-shot TZ6",
+            "One-shot TZ7",
+            "One-shot TZ8"
+          ],
+          "description": "Check to enable the source to the One-Shot OR gate"
+        },
+        {
+          "id": "mcpwmTripZone_cbcSource",
+          "name": "CBC Source",
+          "value": [],
+          "choices": [
+            "TZ1 Cycle By Cycle",
+            "TZ2 Cycle By Cycle",
+            "TZ3 Cycle By Cycle",
+            "TZ4 Cycle By Cycle",
+            "TZ5 Cycle By Cycle",
+            "TZ6 Cycle By Cycle",
+            "TZ7 Cycle By Cycle",
+            "TZ8 Cycle By Cycle"
+          ],
+          "description": "Check to enable the source to the CBC OR gate"
+        },
+        {
+          "id": "mcpwmTripZone_cbcPulse",
+          "name": "CBC Latch Clear Signal",
+          "value": "Disable CBC pulse Clear",
+          "choices": [
+            "Disable CBC pulse Clear",
+            "Clear CBC pulse when counter equals zero",
+            "Clear CBC pulse when counter equals period",
+            "Clear CBC pulse when counter equals zero or period"
+          ],
+          "description": "Select the CBC Trip Zone Latch Clear Signal (TZCLR[CBCPULSE])"
+        },
+        {
+          "id": "mcpwmEventTrigger_enableInterrupt",
+          "name": "Enable MCPWM Interrupt",
+          "value": true,
+          "description": "Check to enable MCPWM interrupt"
+        },
+        {
+          "id": "mcpwmEventTrigger_registerInterrupts",
+          "name": "Register Interrupt Handler",
+          "value": true,
+          "description": "Whether or not to register interrupt handlers in the interrupt module."
+        },
+        {
+          "id": "mcpwmEventTrigger_interruptSource",
+          "name": "Interrupt Event Sources",
+          "value": [
+            "Interrupt Source is Event Trigger 1 signal"
+          ],
+          "choices": [
+            "Interrupt Source is Trip Zone CBC signal",
+            "Interrupt Source is Trip Zone OST signal",
+            "Interrupt Source is Event Trigger 1 signal",
+            "Interrupt Source is Event Trigger 2 signal",
+            "Interrupt Source is Counter Overflow signal"
+          ],
+          "description": "Select all events that must be enabled to generate an MCPWM interrupt"
+        },
+        {
+          "id": "mcpwmEventTrigger_MCPWM_ET_1_triggerEnable",
+          "name": "ET1 Trigger Enable",
+          "value": true,
+          "description": "Enable the Event generated by the ET ET1"
+        },
+        {
+          "id": "mcpwmEventTrigger_MCPWM_ET_1_triggerSource",
+          "name": "ET1 Trigger Source",
+          "value": "Time-base counter equal to period",
+          "choices": [
+            "Event is Disabled",
+            "Time-base counter equal to zero",
+            "Time-base counter equal to period",
+            "Time-base counter equal to zero or period",
+            "Time-base counter equal to CMPC when the timer is incrementing",
+            "Time-base counter equal to CMPD when the timer is incrementing",
+            "Time-base counter equal to CMP1A when the timer is incrementing",
+            "Time-base counter equal to CMP1B when the timer is incrementing",
+            "Time-base counter equal to CMP2A when the timer is incrementing",
+            "Time-base counter equal to CMP2B when the timer is incrementing",
+            "Time-base counter equal to CMP3A when the timer is incrementing",
+            "Time-base counter equal to CMP3B when the timer is incrementing",
+            "Time-base counter equal to CMPC when the timer is Decrementing",
+            "Time-base counter equal to CMPD when the timer is Decrementing",
+            "Time-base counter equal to CMP1A when the timer is Decrementing",
+            "Time-base counter equal to CMP1B when the timer is Decrementing",
+            "Time-base counter equal to CMP2A when the timer is Decrementing",
+            "Time-base counter equal to CMP2B when the timer is Decrementing",
+            "Time-base counter equal to CMP3A when the timer is Decrementing",
+            "Time-base counter equal to CMP3B when the timer is Decrementing"
+          ],
+          "description": "Select the SOC trigger source for ET1"
+        },
+        {
+          "id": "mcpwmEventTrigger_MCPWM_ET_1_triggerEventPrescalar",
+          "name": "ET1 Trigger Event Count",
+          "value": "5 Events Generates Interrupt",
+          "choices": [
+            "Disabled",
+            "1 Event Generates Interrupt",
+            "2 Events Generates Interrupt",
+            "3 Events Generates Interrupt",
+            "4 Events Generates Interrupt",
+            "5 Events Generates Interrupt",
+            "6 Events Generates Interrupt",
+            "7 Events Generates Interrupt"
+          ],
+          "description": "The number of events that have to occur before an SOC is issued"
+        },
+        {
+          "id": "mcpwmEventTrigger_MCPWM_ET_2_triggerEnable",
+          "name": "ET2 Trigger Enable",
+          "value": false,
+          "description": "Enable the Event generated by the ET ET2"
+        },
+        {
+          "id": "mcpwmEventTrigger_MCPWM_SOC_A_triggerEnable",
+          "name": "SOCA Trigger Enable",
+          "value": false,
+          "description": "Enable the SOC trigger generated by the ET submodule for SOCA"
+        },
+        {
+          "id": "mcpwmEventTrigger_MCPWM_SOC_B_triggerEnable",
+          "name": "SOCB Trigger Enable",
+          "value": false,
+          "description": "Enable the SOC trigger generated by the ET submodule for SOCB"
+        },
+        {
+          "id": "mcpwmEventTrigger_MCPWM_SOC_C_triggerEnable",
+          "name": "SOCC Trigger Enable",
+          "value": false,
+          "description": "Enable the SOC trigger generated by the ET submodule for SOCC"
+        },
+        {
+          "id": "mcpwmEventTrigger_MCPWM_SOC_D_triggerEnable",
+          "name": "SOCD Trigger Enable",
+          "value": false,
+          "description": "Enable the SOC trigger generated by the ET submodule for SOCD"
+        },
+        {
+          "id": "useCase",
+          "name": "PinMux Use Case",
+          "value": "2CH",
+          "choices": [
+            "CUSTOM",
+            "ALL",
+            "2CH",
+            "6CH"
+          ],
+          "description": "Peripheral use case"
+        },
+        {
+          "id": "mcpwm",
+          "name": "MCPWM Peripheral",
+          "desiredValue": "MCPWM1",
+          "assignedValue": "MCPWM1",
+          "choices": [
+            "MCPWM1"
+          ]
+        },
+        {
+          "id": "mcpwm.mcpwm_1aPin",
+          "name": "MCPWM_1A",
+          "desiredValue": "GPIO0/42",
+          "assignedValue": "GPIO0/42",
+          "choices": [
+            "A2, GPIO224/6",
+            "GPIO0/42",
+            "GPIO4/38"
+          ]
+        },
+        {
+          "id": "mcpwm.mcpwm_1bPin",
+          "name": "MCPWM_1B",
+          "desiredValue": "GPIO1/41",
+          "assignedValue": "GPIO1/41",
+          "choices": [
+            "A21/PGA1_INP3, A6, GPIO226, GPIO228/4",
+            "GPIO1/41",
+            "GPIO5/47"
+          ]
+        },
+        {
+          "id": "1aQual.padConfig",
+          "name": "Pin Type",
+          "value": "Push-pull output/floating input",
+          "choices": [
+            "Push-pull output/floating input",
+            "Push-pull output/pull-up enabled on input",
+            "Push-pull output/floating INVERTED polarity on an input",
+            "Push-pull output/pull-up enabled on INVERTED input",
+            "Open-drain output/floating input",
+            "Open-drain output with pull-up enabled output and input",
+            "Open-drain output/floating inverted input",
+            "Open-drain output with pull-up enabled output and INVERTED input"
+          ],
+          "description": "Type of pin is driving the gpio."
+        },
+        {
+          "id": "1aQual.qualMode",
+          "name": "Qualification Mode",
+          "value": "Synchronization to SYSCLK",
+          "choices": [
+            "Synchronization to SYSCLK",
+            "Qualified with 3 samples",
+            "Qualified with 6 samples",
+            "No synchronization"
+          ],
+          "description": "The type of qualification done on the pin."
+        },
+        {
+          "id": "1bQual.padConfig",
+          "name": "Pin Type",
+          "value": "Push-pull output/floating input",
+          "choices": [
+            "Push-pull output/floating input",
+            "Push-pull output/pull-up enabled on input",
+            "Push-pull output/floating INVERTED polarity on an input",
+            "Push-pull output/pull-up enabled on INVERTED input",
+            "Open-drain output/floating input",
+            "Open-drain output with pull-up enabled output and input",
+            "Open-drain output/floating inverted input",
+            "Open-drain output with pull-up enabled output and INVERTED input"
+          ],
+          "description": "Type of pin is driving the gpio."
+        },
+        {
+          "id": "1bQual.qualMode",
+          "name": "Qualification Mode",
+          "value": "Synchronization to SYSCLK",
+          "choices": [
+            "Synchronization to SYSCLK",
+            "Qualified with 3 samples",
+            "Qualified with 6 samples",
+            "No synchronization"
+          ],
+          "description": "The type of qualification done on the pin."
+        },
+        {
+          "id": "mcpwmInt",
+          "name": "MCPWM Interrupt ",
+          "value": {
+            "moduleId": "/driverlib/interrupt.js",
+            "moduleInstanceId": "myMCPWM0_ET_INT"
+          },
+          "sharedOwnership": false,
+          "readOnly": true,
+          "description": "Represents another module instance that is explicitly owned by this module instance"
+        }
+      ],
+      "commonSettingsAffectingAllInstances": [
+        {
+          "id": "$static.enableInfo",
+          "name": "Enable Info Mode",
+          "value": true
+        },
+        {
+          "id": "$static.enableWarning",
+          "name": "Enable Warnings",
+          "value": true
+        },
+        {
+          "id": "$static.enableAllCode",
+          "name": "Enable All Code Generation",
+          "value": false,
+          "description": "Enable All Code Generation"
+        },
+        {
+          "id": "$static.commentOutDefaultCode",
+          "name": "Comment Out the Default Settings Code",
+          "value": false,
+          "description": "Comment Out the Default Settings Code"
+        },
+        {
+          "id": "$static.generateInitFunctions",
+          "name": "Generate Init Function for Each Instance",
+          "value": false,
+          "description": "Generate Init Function for Each Instance"
+        }
+      ]
+    }
+  ]
+}

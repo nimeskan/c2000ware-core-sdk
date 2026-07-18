@@ -128,6 +128,14 @@ Total: **23 tools** (4 always available + 19 that appear after `openFile`).
   first. Returns instructions for how to use the configuration tools now
   available (in `additionalInstructions`).
 
+  > **⚠️ Known headless limitation — see "Known limitation: first-time
+  > device-selection dialog" below.** The very first time a given
+  > `.syscfg` file is opened by *any* client (MCP or the GUI itself) in a
+  > CCS session, if the project's device ID isn't a fully specific part
+  > number, `openFile` **hangs indefinitely** waiting on a GUI modal
+  > dialog that a pure MCP client cannot answer. It is not a timing
+  > fluke — it reproduced identically across three separate attempts.
+
 #### `closeFile`
 - **Params:** none
 - **Description:** Closes the currently open file. Configuration tools
@@ -329,6 +337,123 @@ Total: **23 tools** (4 always available + 19 that appear after `openFile`).
 | `traceClockSignal` | `toInstance`, `toPin` | No |
 | `listGeneratedArtifacts` | — | No |
 | `readGeneratedArtifact` | `filePath` | No |
+
+---
+
+## Known limitation: first-time device-selection dialog blocks `openFile`
+
+### Symptom
+
+Calling `openFile` on a `.syscfg` file whose owning `.projectspec` used a
+generic device ID (e.g. `F280013x` rather than a concrete part like
+`TMS320F2800137`) **never returns**. The MCP client eventually gives up
+with:
+
+```json
+{"error": {"code": -32001, "message": "MCP error -32001: MCP error -32001: Request timed out"}}
+```
+
+This is not a slow response — it is a genuine hang. It reproduced
+identically across three separate, independent attempts, each timing out
+at exactly 60 seconds:
+
+```
+2026-07-18T03:30:31.798Z -> Tool call: openFile
+2026-07-18T03:31:31.809Z x- Tool call: openFile: MCP error -32001: Request timed out
+
+2026-07-18T03:32:48.114Z -> Tool call: openFile
+2026-07-18T03:33:48.126Z x- Tool call: openFile: MCP error -32001: Request timed out
+
+2026-07-18T03:35:47.419Z -> Tool call: openFile
+2026-07-18T03:36:47.433Z x- Tool call: openFile: MCP error -32001: Request timed out
+```
+
+(from `~/.config/Texas Instruments/CCS/ccs2100/0/theia/ccs_theia.log`).
+Every other tool call in the same log completes in milliseconds — only
+`openFile` ever hangs.
+
+### Root cause
+
+`openFile` launches a real SysConfig engine subprocess
+(`.../sysconfig_1.28.0/dist/runtimeServer.js --uiPort <n> --proxyPort
+<n> ...`), confirmed alive in `ps aux` for the entire duration of every
+hung attempt. But neither of its advertised ports ever actually accepts
+a connection (`curl` to both returned `Connection refused` throughout).
+
+The actual blocker, found by screenshotting the live CCS window while an
+`openFile` call was in flight: CCS pops up a **"Select Device" modal
+dialog**:
+
+> SysConfig has been updated to use standard TI part numbers. The device
+> `F280013x` was specified on the command line. Please select the
+> specific device to use: **Device:** `TMS320F2800137` **Package:**
+> `64PM` **Variant:** `default` — **[CONFIRM]**
+
+This dialog requires a human (or GUI-automation) click. A pure MCP
+client — including CCS's own bundled `Claude Code` agent integration,
+unless it's also independently driving the GUI — has no channel to
+answer it, so the underlying operation waits forever. The 60-second
+error is just the MCP transport's own client-side request timeout firing
+and reporting failure back to the caller; it does **not** mean the
+server gave up — the hung `runtimeServer.js` process and unopened ports
+persist unless the process is killed.
+
+### Workaround (used to confirm this)
+
+Resolve the dialog once, by hand, through the actual GUI (see
+`ccs_headless_gui_and_mcp_walkthrough.md` for how the GUI is driven
+headlessly via `Xvfb` + `xdotool`):
+
+```bash
+export DISPLAY=:99
+xwd -root -out /tmp/shot.xwd && convert /tmp/shot.xwd /tmp/shot.png   # find the CONFIRM button's coordinates
+xdotool mousemove <x> <y> click 1                                     # click CONFIRM
+```
+
+After that one-time click, calling `openFile` again for the **same
+file** — from a brand-new `mcp-server-proxy.js sysconfig` connection —
+completed successfully in **1.6 seconds**, returning the full
+`additionalInstructions` payload and expanding the tool list. A
+follow-up `getModuleInstances` call then returned genuine live data:
+
+```json
+{
+  "instances": [
+    {"moduleId": "/driverlib/epwm.js", "instances": [
+      {"moduleInstanceId": "myEPWM1", "configurableCount": 168},
+      {"moduleInstanceId": "myEPWM2", "configurableCount": 171},
+      {"moduleInstanceId": "myEPWM3", "configurableCount": 171},
+      {"moduleInstanceId": "myEPWM4", "configurableCount": 171}
+    ]},
+    {"moduleId": "/driverlib/sync.js", "instances": [
+      {"moduleInstanceId": "$static", "configurableCount": 5}
+    ]},
+    {"moduleId": "/driverlib/inputxbar_input.js", "instances": [
+      {"moduleInstanceId": "myINPUTXBARINPUT0", "configurableCount": 5},
+      {"moduleInstanceId": "myINPUTXBARINPUT1", "configurableCount": 5}
+    ]}
+  ]
+}
+```
+
+### Practical implications
+
+- **Each fresh `.syscfg` file** whose device isn't already fully
+  resolved will hit this dialog exactly once. Projects built from
+  `.projectspec` files with a concrete device ID (not a generic family
+  name) may never trigger it at all — worth testing per-project.
+- **MCP session state is per-connection, not global.** Resolving the
+  dialog via the GUI, or via one MCP connection's `openFile` call, does
+  **not** carry over to a different MCP connection querying the same
+  file — each new `mcp-server-proxy.js sysconfig` process is its own
+  session against the backend and must independently call `openFile`
+  again (though it's fast once the device is already resolved for that
+  file).
+- **A pure MCP-only agent, with no GUI access, cannot get past this by
+  itself** on a file hitting it for the first time. It needs either a
+  human at the actual CCS window, or a GUI-automation layer (as
+  documented in `ccs_headless_gui_and_mcp_walkthrough.md`) sitting
+  alongside it, watching for and dismissing this dialog.
 
 ---
 

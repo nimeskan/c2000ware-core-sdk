@@ -1,44 +1,21 @@
----
-name: epwm-mcpwm-instance-setup
-description: >
-  Second phase of an EPWM-to-MCPWM migration: given an already-confirmed
-  grouping/mapping report (from the epwm-mcpwm-sync-migration-report
-  skill), creates the actual MCPWM module instances on a target device's
-  .syscfg file and configures ONLY their time-base and synchronization
-  settings (period, clock divider, counter mode, sync-in/sync-out, phase)
-  to match the confirmed grouping. Does NOT touch action-qualifier,
-  counter-compare, dead-band, trip-zone, or event-trigger configuration --
-  that is a separate, later phase. Use this only after a user has reviewed
-  and explicitly confirmed a migration grouping report; never run it from
-  a report the user hasn't signed off on. Trigger when the user says
-  something like "now set up the MCPWM modules", "apply the mapping we
-  confirmed", "create the target instances", or otherwise asks to move
-  from the migration report into actually building the target
-  configuration's PWM mapping and synchronization.
----
+# Phase 2 -- EPWM -> MCPWM Instance Setup (PWM Mapping + Synchronization)
 
-# EPWM -> MCPWM Instance Setup (PWM Mapping + Synchronization)
+## What this phase does, and doesn't, do
 
-## Where this fits
+Given an already-confirmed grouping from phase 1
+(`references/phase1-migration-report.md`), this phase creates the actual
+MCPWM module instances on the target device's `.syscfg` file and
+configures **only** their time-base and synchronization settings (period,
+clock divider, counter mode, sync-in/sync-out, phase) to match the
+confirmed grouping.
 
-This is phase 2 of a three-phase workflow:
+It does **not** touch action-qualifier, counter-compare, dead-band,
+trip-zone, or event-trigger configuration -- that is phase 3, which hasn't
+been designed yet. Don't drift into it here even opportunistically.
 
-1. **Analysis** (`epwm-mcpwm-sync-migration-report` skill) -- read-only,
-   produces a grouping proposal and a per-instance settings table. Ends
-   with the user confirming or adjusting the grouping.
-2. **This skill** -- creates the target MCPWM instances and sets up their
-   PWM mapping (which source EPWM instances map to which target MCPWM
-   instance, in what pair role) and synchronization (time-base match plus
-   the sync-in/sync-out/phase chain between instances). Ends with the user
-   confirming the applied configuration.
-3. **Not built yet** -- migrating the rest of each EPWM instance's
-   configuration (action-qualifier, counter-compare, dead-band,
-   trip-zone, event-trigger) onto the corresponding MCPWM pairs. Out of
-   scope here on purpose -- don't start on it, even opportunistically.
-
-Do not run this skill against a grouping the user hasn't actually
+Do not run this phase against a grouping the user hasn't actually
 confirmed. If you arrive here without a confirmed grouping in hand (e.g.
-the user skipped straight to "set up MCPWM"), run the phase-1 skill first.
+the user skipped straight to "set up MCPWM"), run phase 1 first.
 
 ## Inputs
 
@@ -159,11 +136,10 @@ Step 2:
 3. **For every EPWM instance whose sync relationship was to another
    instance in the *same* group**, do not set anything at the instance
    level for it. Name it explicitly in the Step 6 report as deferred to
-   counter-compare configuration in phase 3 -- a shared counter can carry
-   exactly one instance-level phase relationship (to whatever's upstream
-   of the whole group), not a separate one per original EPWM instance, so
-   intra-group phase differences have to be reproduced some other way
-   later, not here.
+   phase 3 -- a shared counter can carry exactly one instance-level phase
+   relationship (to whatever's upstream of the whole group), not a
+   separate one per original EPWM instance, so intra-group phase
+   differences have to be reproduced some other way later, not here.
 
 4. **If a single group would need more than one upstream sync-in
    relationship** (e.g. two of its member EPWM instances each synced from
@@ -211,13 +187,3 @@ intra-group phase deferrals and any dropped fields from section 3, since
 those are exactly the places a judgment call was made that the user may
 want to revisit before the target instances get any further configuration
 built on top of them.
-
-## Reference material in this repository
-
-- `syscfg_mcp.md` -- full tool schemas, including `changeConfiguration`'s
-  atomic-per-call semantics and its acceptance of driverlib constant names
-  for choice-type configurables.
-- `epwm_to_mcpwm_migration.md` -- submodule-by-submodule EPWM/MCPWM
-  differences distilled from TI's SPRADL7 application note.
-- `epwm_mcpwm_syscfg_migration.json` -- the authoritative per-configurable
-  mapped/no_equivalent/partial status data referenced throughout Step 3.

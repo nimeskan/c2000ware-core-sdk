@@ -1,26 +1,8 @@
----
-name: epwm-mcpwm-sync-migration-report
-description: >
-  Analyzes an EPWM-based SysConfig (.syscfg) file to determine how its EPWM
-  instances should map onto a target device's MCPWM peripheral, and produces
-  a settings report table -- it does NOT write or modify any .syscfg file.
-  Use this whenever the user wants to migrate, port, or consolidate an
-  existing EPWM-based project to a device with MCPWM, wants to know whether
-  several EPWM instances can share one MCPWM instance, wants the sync chain
-  (SyncIn/SyncOut, phase shift) or time-base settings of an EPWM project
-  checked before a migration, or asks for a mapping/compatibility report
-  between EPWM and MCPWM configuration. Trigger even if the user doesn't say
-  "MCPWM" explicitly but describes moving a multi-EPWM design to a
-  lower-pin-count or motor-control-oriented device. Always produce the
-  analysis report as the deliverable -- do not proceed to actually create or
-  edit any MCPWM .syscfg configuration as part of this skill.
----
+# Phase 1 -- EPWM -> MCPWM Sync/Time-base Migration Report
 
-# EPWM -> MCPWM Sync/Time-base Migration Report
+## What this phase does, and doesn't, do
 
-## What this skill does, and doesn't, do
-
-This skill inspects a source EPWM-based `.syscfg` file, works out how its
+This phase inspects a source EPWM-based `.syscfg` file, works out how its
 EPWM instances are wired together (the sync chain), and reports which EPWM
 instances *could* be consolidated onto a single MCPWM instance on a target
 device, and what their combined time-base/sync settings would need to be.
@@ -28,7 +10,10 @@ device, and what their combined time-base/sync settings would need to be.
 It stops at the report. It does not open, add, or edit any MCPWM module
 instance, and it does not write any `.syscfg` file. That is deliberate --
 treat "propose the equivalent MCPWM settings as configuration changes" as
-out of scope for this skill even if it would be easy to continue further.
+out of scope for this phase even if it would be easy to continue further.
+Writing to the target file is phase 2's job
+(`references/phase2-instance-setup.md`), and only once the user has
+confirmed this phase's output.
 
 **Why the sync chain matters here:** a single MCPWM instance shares *one*
 time-base counter (`TBCTR`) across all of its PWM output pairs. Two EPWM
@@ -42,7 +27,8 @@ sync relationship is what a shared MCPWM counter is standing in for.
 
 ## Inputs
 
-This skill needs three things, gathered from the user before starting:
+This phase needs three things, gathered from the user before starting (the
+orchestrating `SKILL.md` may already have collected these):
 
 1. **Source device** -- the device the source `.syscfg` file targets.
 2. **Source `.syscfg` file** -- absolute path to the file to analyze.
@@ -209,7 +195,7 @@ has. To determine that for the target device:
   user-visible change to a project you were only supposed to be inspecting.
 - If no such file exists yet, note this as a gap in the report rather than
   guessing a pair/instance count -- the target device's data sheet or TRM
-  is the authoritative source, and this skill's job is the EPWM-side
+  is the authoritative source, and this phase's job is the EPWM-side
   analysis, not confirming target hardware limits from scratch.
 
 ### Step 7 -- Produce the report
@@ -217,8 +203,9 @@ has. To determine that for the target device:
 Do not include any guidance on the mechanics of creating the target
 `.syscfg` file, calling `addModuleInstances`/`changeConfiguration` for
 MCPWM, or naming target instances -- that is explicitly out of scope for
-this skill's output. The report is the deliverable; use exactly this
-structure and section order so nothing gets left out:
+this phase's output (it belongs to phase 2). The report is the
+deliverable; use exactly this structure and section order so nothing gets
+left out:
 
 **1. Sync topology.** One sentence naming the sync root (which EPWM
 instance, and how you know -- e.g. it's the one selected in the
@@ -284,23 +271,5 @@ since that's where a judgment call was made (how to partition instances
 into groups of <=3) that the user may want to override -- e.g. a different
 grouping that keeps a different set of instances together, or a decision
 about how to handle a flagged cross-group sync relationship. Only continue
-into any follow-on configuration work once the user explicitly confirms the
-report and says to proceed.
-
-Once the user confirms, the next phase (creating the target MCPWM
-instances and setting up their time-base/synchronization per the confirmed
-grouping) is a separate skill: `epwm-mcpwm-instance-setup`. Hand off to it
-rather than open the target `.syscfg` file yourself from here.
-
-## Reference material in this repository
-
-- `syscfg_mcp.md` -- full tool schemas and known limitations for the
-  SysConfig MCP server, including the `openFile` device-dialog hang
-  referenced in Step 1.
-- `epwm_to_mcpwm_migration.md` -- submodule-by-submodule EPWM/MCPWM
-  differences and driverlib renames, distilled from TI's SPRADL7
-  application note.
-- `epwm_mcpwm_syscfg_migration.json` -- per-configurable EPWM -> MCPWM
-  mapping data (status: mapped / no_equivalent / partial) for every
-  SysConfig configurable, useful context once someone moves past this
-  report into actually building the target configuration.
+into phase 2 once the user explicitly confirms the report and says to
+proceed -- at that point, switch to `references/phase2-instance-setup.md`.

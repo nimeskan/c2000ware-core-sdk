@@ -38,7 +38,6 @@ purpose-built for 3-phase motor control:
 - Chopper submodule
 - One-shot sync (out)
 - Down-count mode (only up-count remains)
-- `CTRMAX` overflow flag
 - Separate TZ (trip-zone) interrupt — folded into the single MCPWM interrupt
 - Software-forced trip events (`TZFRC`) — use action-qualifier SW force or a GPIO instead
 - T1/T2 action-qualifier trigger events
@@ -168,38 +167,26 @@ init value) functions have **no MCPWM equivalent**.
 
 ## 3. Practical migration checklist
 
-Based on the above, converting `epwm_ex3_synchronization` (4 independent
-EPWM instances + `sync` submodule) toward real MCPWM code means:
+Converting, for example 4 independent EPWM instances + `sync` submodule 
+toward real MCPWM code means:
 
 1. **Consolidate instances.** 4 separate `EPWM` instances → 1–2 `MCPWM`
    instances (each covers up to 3 output pairs). Check whether the
    synchronization behavior between the 4 original channels can be
    re-expressed as phase offsets within shared MCPWM pairs via
    counter-compare, since there's only one counter per MCPWM instance.
-2. **Rename every driverlib call** `EPWM_*` → `MCPWM_*`, watching for the
-   `Active`/`Shadow` split on anything that used to have a toggleable
-   shadow mode (time-base period, counter-compare, action-qualifier).
-3. **Drop calls with no equivalent**: one-shot sync, digital compare,
+2. **Drop calls with no equivalent**: one-shot sync, digital compare,
    HRPWM, T1/T2, advanced/digital-compare trip actions, custom prescaler
    init values, per-register global-load enables.
-4. **Re-home dead-band and trip-zone config** — these move from
+3. **Re-home dead-band and trip-zone config** — these move from
    per-EPWM-instance to per-MCPWM-instance (shared across all pairs in
    that instance), so if the original 4 EPWM channels had *different*
    dead-band/trip settings, that flexibility doesn't carry over 1:1.
-5. **Re-route trip signals through PWM X-BAR** — MCPWM's TZ1–TZ8 come
+4. **Re-route trip signals through PWM X-BAR** — MCPWM's TZ1–TZ8 come
    from PWM X-BAR outputs, not the same internal signal names EPWM used.
-6. **Check event-trigger mapping** — ET1/ET2 and SOCA–D are all
+5. **Check event-trigger mapping** — ET1/ET2 and SOCA–D are all
    independent on MCPWM; decide which original EPWM SOC/interrupt
    behavior maps to which.
-7. **Rebuild and re-check `getErrorsAndWarnings`/`getInstanceConfiguration`
-   via the SysConfig MCP server** (see `syscfg_mcp.md`) once
-   `myEPWM*` module instances are swapped for `myMCPWM*` ones in the
-   `.syscfg` — module IDs change from `/driverlib/epwm.js` to
-   `/driverlib/mcpwm.js`, and configurable IDs mostly follow the same
-   driverlib renames listed above (e.g. `epwmTimebase_period` →
-   `mcpwm...` equivalents — confirm exact IDs via `getInstanceConfiguration`
-   against a real MCPWM instance, as done for `myMCPWM0` in
-   `syscfg_mcp_example_myMCPWM0_getInstanceConfiguration.json`).
 
 ---
 

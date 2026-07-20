@@ -128,8 +128,10 @@ Call `save`. Then present a report with:
 
 ### Step 6 -- Stop and confirm before the next sub-phase
 
-**End your turn after presenting the report.** Do not proceed to the next
-phase-3 sub-phase in the same turn. Ask the user to review the
-pair-substitution/reconciliation decisions from Step 2 specifically, since
-that's where a judgment call was made that the user may want to override.
+**End your turn after presenting the report.** Do not proceed directly to
+the next phase-3 sub-phase file in the same turn -- return to
+`phase3-overview.md` first, which is where the next sub-phase gets picked
+from. Ask the user to review the pair-substitution/reconciliation
+decisions from Step 2 specifically, since that's where a judgment call was
+made that the user may want to override.
 

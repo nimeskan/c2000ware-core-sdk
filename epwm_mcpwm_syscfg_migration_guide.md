@@ -72,7 +72,8 @@ Of the 462 `no_equivalent` entries, the largest groups by submodule are:
 | Time-base (the subset with no equivalent, e.g. one-shot sync, period link) | 6 |
 | Chopper | 4 |
 
-These line up with the "removed entirely" list in `epwm_to_mcpwm_migration.md`
+These line up with the "removed entirely" list in
+`.claude/skills/epwm-to-mcpwm-sysconfig-migration/references/phase3-overview.md`
 (the SPRADL7 distillation) -- this JSON is the field-by-field enumeration
 of what that document describes at a submodule level.
 
@@ -167,9 +168,10 @@ conflict instead of silently picking one source instance's value.
 ## Related files in this repository
 
 - `epwm_mcpwm_syscfg_migration.json` -- the data this guide describes.
-- `epwm_to_mcpwm_migration.md` -- the submodule-level distillation of TI's
-  SPRADL7 application note; explains *why* the `no_equivalent` categories
-  above were removed, not just that they were.
+- `.claude/skills/epwm-to-mcpwm-sysconfig-migration/references/phase3-overview.md` --
+  the submodule-level distillation of TI's SPRADL7 application note (now
+  phase 3's hub file); explains *why* the `no_equivalent` categories above
+  were removed, not just that they were.
 - `syscfg_mcp.md` -- SysConfig MCP server tool reference, for actually
   reading/writing configurable values on a live project.
 - `.claude/skills/epwm-to-mcpwm-sysconfig-migration/` -- the migration

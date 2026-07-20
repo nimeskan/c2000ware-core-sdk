@@ -480,7 +480,9 @@ instance:
 
 ### Step 4 -- Stop and confirm
 
-End your turn and present the report. There's no `save` to confirm went
-cleanly here, unlike phases 3a-3f -- the confirmation is about whether the
-user agrees with how any flagged concerns should be handled before the
-overall phase-3 migration is considered complete.
+End your turn and present the report, then return to `phase3-overview.md`
+rather than proceeding directly into another sub-phase file. There's no
+`save` to confirm went cleanly here, unlike phases 3a-3f -- the
+confirmation is about whether the user agrees with how any flagged
+concerns should be handled before the overall phase-3 migration is
+considered complete.

@@ -13,8 +13,8 @@ description: >
   global-load, and a removed-submodule audit (chopper, digital compare,
   HRPWM, extended compare, ICL, diode emulation, min dead-band). Use this
   whenever the user wants to migrate, port, or consolidate an existing
-  EPWM-based project to
-  a device with MCPWM, wants to know whether several EPWM instances can
+  EPWM-based project to a device with MCPWM, wants to know whether
+  several EPWM instances can
   share one MCPWM instance, wants the sync chain or time-base settings of
   an EPWM project checked before a migration, or asks to set up / create /
   apply the MCPWM modules for a migration. Trigger even if the user doesn't
@@ -47,31 +47,14 @@ live in the `references/` files below, loaded one phase at a time.
    dead-band, trip-zone, or event-trigger settings.
    -> `references/phase2-instance-setup.md`
 
-3. **Full configuration migration** -- split into seven independent
-   sub-phases, each its own reference file with its own stop-and-confirm
-   gate, run in this order:
-
-   | Sub-phase | Covers | Writes? |
-   |---|---|---|
-   | 3a | Counter-Compare | yes |
-   | 3b | Action-Qualifier | yes |
-   | 3c | Dead-Band | yes |
-   | 3d | Trip-Zone | yes |
-   | 3e | Event-Trigger | yes |
-   | 3f | Global-Load | yes |
-   | 3g | Removed-submodule audit (Chopper, Digital Compare, HRPWM, Extended Compare, ICL, Diode Emulation, Min Dead-Band) | no -- read-only report |
-
-   3a-3f each rely on an MCP tool, `get_syscfg_module_migration_guide`
-   (args: source device, target device, `module_to_module`, and an array of
-   SysConfig configurable ids -- returns markdown migration guidance per
-   id), to get the field-level mapping instead of any locally-cached data.
-   That tool is not guaranteed to be present in every environment -- if
-   it's missing, the sub-phase says so and stops rather than improvising.
-   Every sub-phase also has to translate the tool's naive one-EPWM-to-one-
-   MCPWM-pair assumption onto the real confirmed grouping (pair
-   substitution for per-pair fields, explicit reconciliation for
-   instance-wide-shared fields) -- see each sub-phase file for which kind
-   applies and why.
+3. **Full configuration migration** -- everything else, run as seven
+   independent sub-phases. `references/phase3-overview.md` is this
+   phase's own hub: background on why EPWM and MCPWM differ, plus the
+   ordered list of sub-phase files. Read it first, then read each
+   sub-phase file it points to **one at a time**, returning to it between
+   each one rather than jumping directly from one sub-phase file to the
+   next.
+   -> `references/phase3-overview.md`
 
 Each phase (and each phase-3 sub-phase) ends with an explicit stop-and-
 confirm step. Honor it: end your turn, present the report, and wait for
@@ -120,35 +103,27 @@ device or file path.
   steps): open target file, create MCPWM instances per confirmed group,
   set shared time-base fields, translate the sync chain onto the new
   instances, verify, save and report, stop and confirm before phase 3.
-- `references/phase3a-counter-compare.md` -- CMPA-CMPD migration; pair
-  substitution for CMPA/CMPB, reconciliation for shared CMPC/CMPD.
-- `references/phase3b-action-qualifier.md` -- per-output action-table
-  migration; pair substitution, T1/T2 fields always `no_equivalent`.
-- `references/phase3c-dead-band.md` -- instance-wide, reconciliation only.
-- `references/phase3d-trip-zone.md` -- instance-wide reconciliation, plus
-  re-routing trip sources through PWM X-BAR (not a plain rename).
-- `references/phase3e-event-trigger.md` -- instance-wide reconciliation,
-  plus the one structural (`partial`) field, `epwmEventTrigger_interruptSource`.
-- `references/phase3f-global-load.md` -- instance-wide reconciliation,
-  smallest and simplest field set.
-- `references/phase3g-removed-submodules-audit.md` -- read-only; reports
-  whether the source project actually used any of the seven fully-removed
-  feature areas, rather than silently dropping them.
+- `references/phase3-overview.md` -- phase 3's hub: submodule-by-submodule
+  EPWM/MCPWM differences distilled from TI's SPRADL7 application note,
+  plus the ordered table of the seven sub-phase files below. Read this
+  before any of them.
+  - `references/phase3a-counter-compare.md`
+  - `references/phase3b-action-qualifier.md`
+  - `references/phase3c-dead-band.md`
+  - `references/phase3d-trip-zone.md`
+  - `references/phase3e-event-trigger.md`
+  - `references/phase3f-global-load.md`
+  - `references/phase3g-removed-submodules-audit.md`
 
 Each phase-3 sub-phase file starts with its own complete, exact SysConfig
 id checklist (551 total ids across the whole migration, verified to
 partition with no gaps and no overlaps across phases 1-3g) before its
-step-by-step procedure.
+step-by-step procedure, and gets its field-level migration guidance from
+the live `get_syscfg_module_migration_guide` MCP tool at runtime rather
+than from any file in this repository.
 
 ## Reference material in this repository (shared across phases 1-2)
 
 - `syscfg_mcp.md` -- full tool schemas and known limitations for the
   SysConfig MCP server, including the `openFile` device-dialog hang and
   `changeConfiguration`'s atomic-per-call semantics.
-- `epwm_to_mcpwm_migration.md` -- submodule-by-submodule EPWM/MCPWM
-  differences and driverlib renames, distilled from TI's SPRADL7
-  application note.
-
-Phase 3's sub-phases get their field-level migration guidance from the
-live `get_syscfg_module_migration_guide` MCP tool at runtime instead of any
-file in this repository -- see each `phase3*.md` file for how it's called.

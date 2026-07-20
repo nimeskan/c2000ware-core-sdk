@@ -1,4 +1,45 @@
 # Phase 3 -- EPWM -> MCPWM Submodule Migration
+
+This is the hub for phase 3 of the migration (see the top-level `SKILL.md`
+for how phases 1-3 fit together). Sections 1-3 below are background --
+distilled from TI's SPRADL7 application note -- explaining *why* EPWM and
+MCPWM differ and what a migration has to account for at a conceptual
+level. Section 4 is the actual procedure: seven sub-phases, each its own
+reference file, covering every remaining SysConfig configurable between
+them.
+
+## 4. Sub-phases
+
+Read this file first for context, then work through the sub-phases below
+**one at a time, in order**. After finishing a sub-phase (it will end with
+its own stop-and-confirm step and, for 3a-3f, a save), **return to this
+file** before opening the next one -- don't jump directly from one
+sub-phase file to the next on your own. This file is where you re-orient
+between sub-phases, not a one-time table of contents.
+
+| Sub-phase | File | Covers | Writes? |
+|---|---|---|---|
+| 3a | `phase3a-counter-compare.md` | `CMPA`-`CMPD`, shadow-load modes | yes |
+| 3b | `phase3b-action-qualifier.md` | Per-output action tables, SW force | yes |
+| 3c | `phase3c-dead-band.md` | Rising/falling edge delay, polarity | yes |
+| 3d | `phase3d-trip-zone.md` | Trip actions, CBC/one-shot sources | yes |
+| 3e | `phase3e-event-trigger.md` | Interrupt source, SOC A-D triggers | yes |
+| 3f | `phase3f-global-load.md` | Instance-wide global-load toggles | yes |
+| 3g | `phase3g-removed-submodules-audit.md` | Chopper, Digital Compare, HRPWM, Extended Compare, ICL, Diode Emulation, Min Dead-Band | no -- read-only report |
+
+Sub-phases 3a-3f each call the `get_syscfg_module_migration_guide` MCP tool
+for field-level mapping, then apply the kind of translation this
+background material explains conceptually: pair-substitution for fields
+that are genuinely per-pair on MCPWM (counter-compare's `CMPA`/`CMPB`,
+action-qualifier's per-output tables), or explicit reconciliation for
+fields that are instance-wide-shared (dead-band, trip-zone, event-trigger,
+global-load, and counter-compare's `CMPC`/`CMPD`) whenever a confirmed
+group has more than one source EPWM instance. Sub-phase 3g runs the audit
+described in section 3's "drop calls with no equivalent" item, but as a
+concrete per-project check rather than a general statement -- it can run
+any time after phase 1's grouping is confirmed, independent of 3a-3f's
+order, since it never writes to the target file.
+
 ---
 
 ## 1. Why they're different
@@ -165,15 +206,21 @@ toward real MCPWM code means:
    synchronization behavior between the 4 original channels can be
    re-expressed as phase offsets within shared MCPWM pairs via
    counter-compare, since there's only one counter per MCPWM instance.
+   *(Phases 1-2, plus the counter-compare pair-substitution in 3a.)*
 2. **Drop calls with no equivalent**: one-shot sync, digital compare,
    HRPWM, T1/T2, advanced/digital-compare trip actions, custom prescaler
-   init values, per-register global-load enables.
+   init values, per-register global-load enables. *(Digital compare and
+   HRPWM audited concretely in 3g; T1/T2 called out in 3b, custom
+   prescaler in 3e, and per-register global-load enables in 3f.)*
 3. **Re-home dead-band and trip-zone config** — these move from
    per-EPWM-instance to per-MCPWM-instance (shared across all pairs in
    that instance), so if the original 4 EPWM channels had *different*
    dead-band/trip settings, that flexibility doesn't carry over 1:1.
+   *(The reconciliation step in 3c and 3d.)*
 4. **Re-route trip signals through PWM X-BAR** — MCPWM's TZ1–TZ8 come
    from PWM X-BAR outputs, not the same internal signal names EPWM used.
+   *(3d.)*
 5. **Check event-trigger mapping** — ET1/ET2 and SOCA–D are all
    independent on MCPWM; decide which original EPWM SOC/interrupt
-   behavior maps to which.
+   behavior maps to which. *(3e, including the one structural/`partial`
+   field, `epwmEventTrigger_interruptSource`.)*

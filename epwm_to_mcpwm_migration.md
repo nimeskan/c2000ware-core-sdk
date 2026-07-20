@@ -1,14 +1,4 @@
-# EPWM to MCPWM Migration Guide (Distilled)
-
-Distilled from Texas Instruments application note **SPRADL7 (July 2025)**,
-*"EPWM to MCPWM Migration Guide"* by Luke Jones —
-<https://www.ti.com/lit/an/spradl7/spradl7.pdf>.
-
-This is reference material for anyone actually reworking the
-`epwm_to_mcpwm_migration` project (a copy of `epwm_ex3_synchronization`,
-see `ccs_headless_gui_and_mcp_walkthrough.md` for how it was created) from
-real EPWM code into real MCPWM code — not just a renamed copy.
-
+# Phase 3 -- EPWM -> MCPWM Submodule Migration
 ---
 
 ## 1. Why they're different
@@ -187,10 +177,3 @@ toward real MCPWM code means:
 5. **Check event-trigger mapping** — ET1/ET2 and SOCA–D are all
    independent on MCPWM; decide which original EPWM SOC/interrupt
    behavior maps to which.
-
----
-
-## Reference
-
-Texas Instruments, *F28E12x Real-Time Microcontrollers Technical Reference
-Manual* — cited as the authoritative register-level reference in SPRADL7 §11.

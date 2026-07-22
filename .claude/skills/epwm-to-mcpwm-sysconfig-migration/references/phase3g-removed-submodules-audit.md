@@ -443,7 +443,7 @@ grouping is confirmed.
 ### Step 1 -- Get descriptive context (recommended, not required)
 
 Call `get_syscfg_module_migration_guide` with the source/target device,
-`module_to_module: "epwm_mcpwm"`, and the ids above, to get a human-readable
+`moduleToModule: "epwm_mcpwm"`, and the ids above, to get a human-readable
 description of what each feature does -- useful for explaining *why*
 something is flagged as a concern, not just that a field had a non-default
 value.

@@ -57,9 +57,9 @@ proceeding rather than re-deriving or guessing them.
 
 Call `get_syscfg_module_migration_guide` with:
 
-- `source_device`: the source device
-- `target_device`: the target device
-- `module_to_module`: `"epwm_mcpwm"`
+- `sourceDevice`: the source device
+- `targetDevice`: the target device
+- `moduleToModule`: `"epwm_mcpwm"`
 - `ids`: the list above (or, cheaper, first narrow it to just the ids that
   actually exist on the source instances -- query `getInstanceConfiguration`
   with the full list and see what comes back; an id the device doesn't have

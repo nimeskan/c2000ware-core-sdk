@@ -58,27 +58,23 @@
 // $
 //#############################################################################
 //
-
 //
 // Included Files
 //
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
 //
 // Globals
 //
 uint16_t adcAResult0; 
 uint16_t adcAResult1;
 uint16_t adcAResult2;
-
 //
 // Function Prototypes
 //
 void initMCPWM();
 __interrupt void adcA1ISR(void);
-
 //
 // Main
 //
@@ -88,23 +84,19 @@ void main(void)
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pullups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Set up ADCs:
     // Signal Mode           : single-ended
@@ -120,24 +112,20 @@ void main(void)
     // averaged together for oversampled channel A8 result
     //
     Board_init();
-
     //
     // Initialize PWM
     //
     initMCPWM();
-
     //
     // Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     //
     // Start MCPWM1, enabling SOCA and putting the counter in up-count mode
     //
     MCPWM_enableADCTrigger(PWM1_BASE, MCPWM_SOC_A);
     MCPWM_setTimeBaseCounterMode(PWM1_BASE, MCPWM_COUNTER_MODE_UP);
-
     //
     // Take conversions indefinitely in loop
     //
@@ -150,7 +138,6 @@ void main(void)
     }
     while(1);
 }
-
 //
 // Function to configure MCPWM1 to generate the SOC.
 //
@@ -164,18 +151,15 @@ void initMCPWM(void)
     //
     MCPWM_setPeriodLoadMode(PWM1_BASE, MCPWM_PERIOD_SHADOW_LOAD_DISABLE);
     MCPWM_setCounterCompareShadowLoadMode(PWM1_BASE, MCPWM_COUNTER_COMPARE_1A, MCPWM_COMP_LOAD_FREEZE);
-
     //
     // Disable SOCA
     //
     MCPWM_disableADCTrigger(PWM1_BASE, MCPWM_SOC_A);
-
     //
     // Configure the SOC to occur on the first up-count event
     //
     MCPWM_setADCTriggerSource(PWM1_BASE, MCPWM_SOC_A, MCPWM_SOC_TBCTR_U_CMP1A);
     MCPWM_setADCTriggerEventPrescale(PWM1_BASE, MCPWM_SOC_A, 1);
-
     //
     // Set the compare A value to 1000 and the period to 1999
     // Assuming MCPWM clock is 100MHz, this would give 50kHz sampling
@@ -185,18 +169,15 @@ void initMCPWM(void)
     //
     MCPWM_setCounterCompareActiveValue(PWM1_BASE, MCPWM_COUNTER_COMPARE_1A, 1000);
     MCPWM_setTimeBasePeriodActive(PWM1_BASE, 1999);
-
     //
     // Set the local MCPWM module clock divider to /1
     //
     MCPWM_setClockPrescaler(PWM1_BASE, MCPWM_CLOCK_DIVIDER_1);
-
     //
     // Freeze the counter
     //
     MCPWM_setTimeBaseCounterMode(PWM1_BASE, MCPWM_COUNTER_MODE_STOP_FREEZE);
 }
-
 //
 // adcA1ISR - ADC A Interrupt 1 ISR
 //
@@ -207,21 +188,20 @@ __interrupt void adcA1ISR(void)
     //
     adcAResult0 = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER0);
     adcAResult1 = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER1);
-
     //
-    // Average the 4 oversampled A8 results together
+    // Sum the 4 oversampled A8 results together
+    // Note: result is multiplied up by the oversampling factor (4x).
+    // Include this at the system level when using the result.
     //
-    adcAResult2 = 
+    adcAResult2 =
         (ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER2) +
         ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER3) +
         ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER4) +
-        ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER5)) >> 2;
-
+        ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER5));
     //
     // Clear the interrupt flag
     //
     ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
-
     //
     // Check if overflow has occurred
     //
@@ -230,13 +210,11 @@ __interrupt void adcA1ISR(void)
         ADC_clearInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1);
         ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
     }
-
     //
     // Acknowledge the interrupt
     //
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
 }
-
 //
 // End of file
 //

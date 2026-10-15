@@ -828,7 +828,7 @@ ADC_forceRepeaterTrigger(uint32_t base, uint16_t repInstance)
   //
   // Triggers the selected repeater instance
   //
-  HWREG(regOffset + ADC_O_REP1FRC) |= ADC_REP1FRC_SWFRC;
+  HWREG(regOffset + ADC_O_REP1FRC) |= (uint32_t)ADC_REP1FRC_SWFRC;
   EDIS;
 }
 
@@ -1046,7 +1046,7 @@ ADC_enableConverter(uint32_t base)
     // Set the bit that powers up the analog circuitry.
     //
     EALLOW;
-    HWREG(base + ADC_O_CTL1) |= ADC_CTL1_ADCPWDNZ;
+    HWREG(base + ADC_O_CTL1) |= (uint32_t)ADC_CTL1_ADCPWDNZ;
     EDIS;
 }
 
@@ -1073,7 +1073,7 @@ ADC_disableConverter(uint32_t base)
     // Clear the bit that powers down the analog circuitry.
     //
     EALLOW;
-    HWREG(base + ADC_O_CTL1) &= ~ADC_CTL1_ADCPWDNZ;
+    HWREG(base + ADC_O_CTL1) &= ~((uint32_t)ADC_CTL1_ADCPWDNZ);
     EDIS;
 }
 
@@ -1749,7 +1749,7 @@ ADC_enablePPBEvent(uint32_t base, ADC_PPBNumber ppbNumber, uint16_t evtFlags)
     // Enable the specified event.
     //
     EALLOW;
-    HWREG(base + ADC_O_EVTSEL) |= evtFlags << ((uint32_t)ppbNumber * 4UL);
+    HWREG(base + ADC_O_EVTSEL) |= (uint32_t)evtFlags << ((uint32_t)ppbNumber * 4UL);
     EDIS;
 }
 
@@ -1782,7 +1782,7 @@ ADC_disablePPBEvent(uint32_t base, ADC_PPBNumber ppbNumber, uint16_t evtFlags)
     // Disable the specified event.
     //
     EALLOW;
-    HWREG(base + ADC_O_EVTSEL) &= ~(evtFlags << ((uint32_t)ppbNumber * 4UL));
+    HWREG(base + ADC_O_EVTSEL) &= ~((uint32_t)evtFlags << ((uint32_t)ppbNumber * 4UL));
     EDIS;
 }
 
@@ -1817,7 +1817,7 @@ ADC_enablePPBEventInterrupt(uint32_t base, ADC_PPBNumber ppbNumber,
     // Enable the specified event interrupts.
     //
     EALLOW;
-    HWREG(base + ADC_O_EVTINTSEL) |= intFlags << ((uint32_t)ppbNumber * 4UL);
+    HWREG(base + ADC_O_EVTINTSEL) |= (uint32_t)intFlags << ((uint32_t)ppbNumber * 4UL);
     EDIS;
 }
 
@@ -1852,7 +1852,7 @@ ADC_disablePPBEventInterrupt(uint32_t base, ADC_PPBNumber ppbNumber,
     // Disable the specified event interrupts.
     //
     EALLOW;
-    HWREG(base + ADC_O_EVTINTSEL) &= ~(intFlags <<
+    HWREG(base + ADC_O_EVTINTSEL) &= ~((uint32_t)intFlags <<
                                         ((uint32_t)ppbNumber * 4UL));
     EDIS;
 }
@@ -1914,7 +1914,7 @@ ADC_clearPPBEventStatus(uint32_t base, ADC_PPBNumber ppbNumber,
     //
     // Clear the specified event interrupts.
     //
-    HWREG(base + ADC_O_EVTCLR) |= evtFlags << ((uint32_t)ppbNumber * 4UL);
+    HWREG(base + ADC_O_EVTCLR) |= (uint32_t)evtFlags << ((uint32_t)ppbNumber * 4UL);
 }
 
 //*****************************************************************************
@@ -1951,7 +1951,7 @@ ADC_enablePPBEventCBCClear(uint32_t base, ADC_PPBNumber ppbNumber)
     // Set automatic cycle-by-cycle flag clear bit
     //
     EALLOW;
-    HWREG(base + ppbOffset)  |= ADC_PPB1CONFIG_CBCEN;
+    HWREG(base + ppbOffset)  |= (uint32_t)ADC_PPB1CONFIG_CBCEN;
     EDIS;
 }
 
@@ -1988,7 +1988,7 @@ ADC_disablePPBEventCBCClear(uint32_t base, ADC_PPBNumber ppbNumber)
     // Clear automatic cycle-by-cycle flag clear bit
     //
     EALLOW;
-    HWREG(base + ppbOffset)  &= ~ADC_PPB1CONFIG_CBCEN;
+    HWREG(base + ppbOffset)  &= ~((uint32_t)ADC_PPB1CONFIG_CBCEN);
     EDIS;
 }
 
@@ -2024,7 +2024,7 @@ ADC_setPPBCountLimit(uint32_t base, ADC_PPBNumber ppbNumber, uint16_t limit)
     //
     EALLOW;
     HWREG(base + ADC_O_PPB1LIMIT) =
-                (HWREG(base + ADC_O_PPB1LIMIT) & ~(ADC_PPB1LIMIT_LIMIT_M)) |
+                (HWREG(base + ADC_O_PPB1LIMIT) & ~((uint32_t)ADC_PPB1LIMIT_LIMIT_M)) |
                 (limit << ADC_PPB1LIMIT_LIMIT_S);
     EDIS;
 
@@ -2060,7 +2060,7 @@ ADC_getPPBCountLimit(uint32_t base, ADC_PPBNumber ppbNumber)
     // Get the offset to the appropriate PPB configuration register.
     //
 
-    limit = (HWREG(base + ADC_O_PPB1LIMIT) & ~(ADC_PPB1LIMIT_LIMIT_M)) >>
+    limit = (HWREG(base + ADC_O_PPB1LIMIT) & ~((uint32_t)ADC_PPB1LIMIT_LIMIT_M)) >>
             ADC_PPB1LIMIT_LIMIT_S;
     return(limit);
 }
@@ -2161,7 +2161,7 @@ ADC_setPPBShiftValue(uint32_t base, ADC_PPBNumber ppbNumber, uint16_t shiftVal)
     // Configure shift value for the PPB.
     //
     HWREG(base + ADC_O_PPB1CONFIG2) =
-                (HWREG(base + ADC_O_PPB1CONFIG2) & ~(ADC_PPB1CONFIG2_SHIFT_M)) |
+                (HWREG(base + ADC_O_PPB1CONFIG2) & ~((uint32_t)ADC_PPB1CONFIG2_SHIFT_M)) |
                 (shiftVal << ADC_PPB1CONFIG2_SHIFT_S);
 }
 
@@ -2195,7 +2195,7 @@ ADC_selectPPBSyncInput(uint32_t base, ADC_PPBNumber ppbNumber,
     ASSERT(syncInput <= 7U);
 
     HWREG(base + ADC_O_PPB1CONFIG2) =
-            (HWREG(base + ADC_O_PPB1CONFIG2) & ~(ADC_PPB1CONFIG2_SYNCINSEL_M)) |
+            (HWREG(base + ADC_O_PPB1CONFIG2) & ~((uint32_t)ADC_PPB1CONFIG2_SYNCINSEL_M)) |
             (syncInput << ADC_PPB1CONFIG2_SYNCINSEL_S);
 }
 
@@ -2222,7 +2222,7 @@ ADC_forcePPBSync(uint32_t base, ADC_PPBNumber ppbNumber)
     //
     ASSERT(ADC_isBaseValid(base));
 
-    HWREG(base + ADC_O_PPB1CONFIG2) |= ADC_PPB1CONFIG2_SWSYNC;
+    HWREG(base + ADC_O_PPB1CONFIG2) |= (uint32_t)ADC_PPB1CONFIG2_SWSYNC;
 }
 
 //*****************************************************************************
@@ -2254,7 +2254,7 @@ ADC_selectPPBOSINTSource(uint32_t base, ADC_PPBNumber ppbNumber,
     ASSERT(osIntSrc <= 1U);
 
     HWREG(base + ADC_O_PPB1CONFIG2) =
-               (HWREG(base + ADC_O_PPB1CONFIG2) & ~(ADC_PPB1CONFIG2_OSINTSEL)) |
+               (HWREG(base + ADC_O_PPB1CONFIG2) & ~((uint32_t)ADC_PPB1CONFIG2_OSINTSEL)) |
                (osIntSrc << 12UL);
 }
 
@@ -2288,7 +2288,7 @@ ADC_selectPPBCompareSource(uint32_t base, ADC_PPBNumber ppbNumber,
     ASSERT(compSrc <= 1U);
 
     HWREG(base + ADC_O_PPB1CONFIG2) =
-            (HWREG(base + ADC_O_PPB1CONFIG2) & ~(ADC_PPB1CONFIG2_COMPSEL)) |
+            (HWREG(base + ADC_O_PPB1CONFIG2) & ~((uint32_t)ADC_PPB1CONFIG2_COMPSEL)) |
             (compSrc << 15UL);
 }
 
@@ -2531,7 +2531,7 @@ ADC_enablePPBTwosComplement(uint32_t base, ADC_PPBNumber ppbNumber)
     // Enable PPB two's complement.
     //
     EALLOW;
-    HWREG(base + ppbOffset) |= ADC_PPB1CONFIG_TWOSCOMPEN;
+    HWREG(base + ppbOffset) |= (uint32_t)ADC_PPB1CONFIG_TWOSCOMPEN;
     EDIS;
 }
 
@@ -2571,7 +2571,7 @@ ADC_disablePPBTwosComplement(uint32_t base, ADC_PPBNumber ppbNumber)
     // Disable PPB two's complement.
     //
     EALLOW;
-    HWREG(base + ppbOffset) &= ~ADC_PPB1CONFIG_TWOSCOMPEN;
+    HWREG(base + ppbOffset) &= ~((uint32_t)ADC_PPB1CONFIG_TWOSCOMPEN);
     EDIS;
 }
 
@@ -2616,7 +2616,7 @@ ADC_enableInterrupt(uint32_t base, ADC_IntNumber adcIntNum)
     //
     EALLOW;
 
-    HWREG(intRegAddr) |= ADC_INTSEL_INT1E << shiftVal;
+    HWREG(intRegAddr) |= (uint32_t)ADC_INTSEL_INT1E << shiftVal;
 
     EDIS;
 }
@@ -2662,7 +2662,7 @@ ADC_disableInterrupt(uint32_t base, ADC_IntNumber adcIntNum)
     //
     EALLOW;
 
-    HWREG(intRegAddr) &= ~(ADC_INTSEL_INT1E << shiftVal);
+    HWREG(intRegAddr) &= ~((uint32_t)ADC_INTSEL_INT1E << shiftVal);
 
     EDIS;
 }
@@ -2714,7 +2714,7 @@ ADC_setInterruptSource(uint32_t base, ADC_IntNumber adcIntNum,
     EALLOW;
 
     HWREG(intRegAddr) =
-        (HWREG(intRegAddr) & ~(ADC_INTSEL_INT1SEL_M << shiftVal)) |
+        (HWREG(intRegAddr) & ~((uint32_t)ADC_INTSEL_INT1SEL_M << shiftVal)) |
         ((uint32_t)intTrigger << shiftVal);
 
     EDIS;
@@ -2762,7 +2762,7 @@ ADC_enableContinuousMode(uint32_t base, ADC_IntNumber adcIntNum)
     //
     EALLOW;
 
-    HWREG(intRegAddr) |= ADC_INTSEL_INT1CONT << shiftVal;
+    HWREG(intRegAddr) |= (uint32_t)ADC_INTSEL_INT1CONT << shiftVal;
 
     EDIS;
 }
@@ -2810,7 +2810,7 @@ ADC_disableContinuousMode(uint32_t base, ADC_IntNumber adcIntNum)
     //
     EALLOW;
 
-    HWREG(intRegAddr) &= ~(ADC_INTSEL_INT1CONT << shiftVal);
+    HWREG(intRegAddr) &= ~((uint32_t)ADC_INTSEL_INT1CONT << shiftVal);
 
     EDIS;
 }
@@ -2848,7 +2848,7 @@ ADC_enableDMAInterrupt(uint32_t base, ADC_IntNumber adcIntNum)
     //
     EALLOW;
 
-    HWREG(base + ADC_O_DMAINTSEL) |= ADC_DMAINTSEL_DMAINT1E << shiftVal;
+    HWREG(base + ADC_O_DMAINTSEL) |= (uint32_t)ADC_DMAINTSEL_DMAINT1E << shiftVal;
 
     EDIS;
 }
@@ -2887,7 +2887,7 @@ ADC_disableDMAInterrupt(uint32_t base, ADC_IntNumber adcIntNum)
     //
     EALLOW;
 
-    HWREG(base + ADC_O_DMAINTSEL) &= ~(ADC_DMAINTSEL_DMAINT1E << shiftVal);
+    HWREG(base + ADC_O_DMAINTSEL) &= ~((uint32_t)ADC_DMAINTSEL_DMAINT1E << shiftVal);
 
     EDIS;
 }
@@ -2973,7 +2973,7 @@ ADC_enableDMAContinuousMode(uint32_t base, ADC_IntNumber adcIntNum)
     //
     EALLOW;
 
-    HWREG(base + ADC_O_DMAINTSEL) |= ADC_DMAINTSEL_DMAINT1CONT << shiftVal;
+    HWREG(base + ADC_O_DMAINTSEL) |= (uint32_t)ADC_DMAINTSEL_DMAINT1CONT << shiftVal;
 
     EDIS;
 }
@@ -3014,7 +3014,7 @@ ADC_disableDMAContinuousMode(uint32_t base, ADC_IntNumber adcIntNum)
     //
     EALLOW;
 
-    HWREG(base + ADC_O_DMAINTSEL) &= ~(ADC_DMAINTSEL_DMAINT1CONT << shiftVal);
+    HWREG(base + ADC_O_DMAINTSEL) &= ~((uint32_t)ADC_DMAINTSEL_DMAINT1CONT << shiftVal);
 
     EDIS;
 }

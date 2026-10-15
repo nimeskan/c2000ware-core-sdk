@@ -71,19 +71,16 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //###########################################################################
-
 //
 // Included Files
 //
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
 //
 // Function Prototypes
 //
 void initMCPWM(void);
-
 //
 // Main
 //
@@ -93,28 +90,23 @@ void main(void)
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pullups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Set up ePWM7 to take CTRIPH as TRIP4 for its DC trip input
     //
     initMCPWM();
-
     //
     // Board Initialization
     // - Configure GPIO4 to output CTRIPOUTH (routed through XBAROUTPUT3)
@@ -128,20 +120,16 @@ void main(void)
     //   the asynchronous comparator output.
     //
     Board_init();
-
-
     //
     // Configure GPIO0 to output CTRIPH (routed through MCPWM TRIP4 and MCPWM1)
     //
     GPIO_setPinConfig(GPIO_0_MCPWM1_1A);
     GPIO_setPadConfig(0, GPIO_PIN_TYPE_STD);
-
     //
     // Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     //
     // Loop indefinitely
     //
@@ -159,17 +147,14 @@ void main(void)
             {
                 ;
             }
-
             //
             // Clear trip zone flags
             //
             MCPWM_clearInterrupt(PWM1_BASE, MCPWM_INT_TZ_OST);
             MCPWM_clearTripZoneFlagStatus(PWM1_BASE, MCPWM_TZ_FLAG_OST_TZ4);
-
         }
     }
 }
-
 //
 // initMCPWM - Function to configure MCPWM1 and the MCPWM X-BAR to take CTRIPH as
 //            the DC trip input
@@ -180,7 +165,6 @@ void initMCPWM(void)
     // Disable the MCPWM time base clock before configuring the module
     //
     SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Load Mode configurations
     //
@@ -191,23 +175,19 @@ void initMCPWM(void)
     MCPWM_setPeriodLoadMode(PWM1_BASE, MCPWM_PERIOD_SHADOW_LOAD_DISABLE);
     MCPWM_setCounterCompareShadowLoadMode(PWM1_BASE, MCPWM_COUNTER_COMPARE_1A, MCPWM_COMP_LOAD_FREEZE);
     MCPWM_setActionQualifierShadowLoadMode(PWM1_BASE, MCPWM_ACTION_QUALIFIER_1A, MCPWM_AQ_LOAD_FREEZE);
-
     //
     // Set the time base clock prescalers to /1
     //
     MCPWM_setClockPrescaler(PWM1_BASE, MCPWM_CLOCK_DIVIDER_1);
-
     //
     // Initializing dummy values for ePWM counter and period
     //
     MCPWM_setTimeBaseCounter(PWM1_BASE, 0);
     MCPWM_setTimeBasePeriodActive(PWM1_BASE, 0xFFFF);
-
     //
     // Set-up compare
     //
     MCPWM_setCounterCompareActiveValue(PWM1_BASE, MCPWM_COUNTER_COMPARE_1A, 0x8000);
-
     //
     // Set actions
     //
@@ -215,49 +195,40 @@ void initMCPWM(void)
                                   MCPWM_AQ_OUTPUT_1A,
                                   MCPWM_AQ_OUTPUT_HIGH,
                                   MCPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
-
     MCPWM_setActionQualifierActionActive(PWM1_BASE,
                                   MCPWM_AQ_OUTPUT_1A,
                                   MCPWM_AQ_OUTPUT_LOW,
                                   MCPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
-
     //
     // Configure TRIP4 to be CTRIP1H using the ePWM X-BAR
     //
     XBAR_setPWMMuxConfig(XBAR_TRIP4, XBAR_PWM_MUX02_CMPSS2_CTRIPH);
     XBAR_enablePWMMux(XBAR_TRIP4, XBAR_MUX02);
-
     //
     // Invert the trip signal since MCPWM trip-zone signal is active low signal
     //
     XBAR_invertPWMSignal(XBAR_TRIP4, true);
-
     //
     // Configure MCPWM1A to output high on TZA TRIP
     //
     MCPWM_setTripZoneAction(PWM1_BASE, MCPWM_TZ_ACTION_EVENT_TZA,
                            MCPWM_TZ_ACTION_HIGH);
-
     //
     // Enable DCB as OST
     //
     MCPWM_enableTripZoneSignals(PWM1_BASE, MCPWM_TZ_SIGNAL_OSHT4);
-
     //
     // Sync the ePWM time base clock
     //
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Clear trip flags
     //
     MCPWM_clearTripZoneFlagStatus(PWM1_BASE, MCPWM_TZ_FLAG_OST_TZ4);
-
     //
     // Clear the OneShot Trip interrupt flag
     //
     MCPWM_clearInterrupt(PWM1_BASE, MCPWM_INT_TZ_OST);
-
     //
     // Put the time base counter into up-count mode
     //

@@ -140,5 +140,7 @@ var group__uart__api =
     [ "UART_configure9BitDataMode", "group__uart__api.html#gae2d57b055741e4a7be47ecf5003836cd", null ],
     [ "UART_setConfig", "group__uart__api.html#ga41c6d99b6e60b52d22729be7d6fc9e1d", null ],
     [ "UART_getConfig", "group__uart__api.html#ga25f18a72192b6acb5f748333cab2f781", null ],
-    [ "UART_writeCharNonBlocking", "group__uart__api.html#ga328c1865b935f22dce0e8932a91544ab", null ]
+    [ "UART_writeCharNonBlocking", "group__uart__api.html#ga328c1865b935f22dce0e8932a91544ab", null ],
+    [ "UART_writeCharArray", "group__uart__api.html#ga3c4edb3443073600e339109cf80041ca", null ],
+    [ "UART_readCharArray", "group__uart__api.html#ga7475a467dd8daa6244fe30aea4af6b6c", null ]
 ];

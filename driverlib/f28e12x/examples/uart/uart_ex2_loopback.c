@@ -58,7 +58,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //#############################################################################
-
 //
 // Included Files
 //
@@ -66,7 +65,6 @@
 #include "device.h"
 #include "board.h"
 #include "c2000ware_libraries.h"
-
 //
 // Define to enable external UART loopback configuration
 //
@@ -75,45 +73,37 @@
 //      external connections required
 //
 #define EXTERNAL_LOOPBACK_ENABLE    0
-
 //
 // Defines
 //
 uint16_t sData, rData;
 uint16_t errorCount, loopCount;
-
 //
 // Main
 //
 void main(void)
 {
-
     //
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pull-ups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // PinMux and Peripheral Initialization
     //
     Board_init();
-
     #if EXTERNAL_LOOPBACK_ENABLE == 1
         //
         // External loopback configuration
@@ -125,25 +115,21 @@ void main(void)
         //
         UART_enableLoopback(myUART0_BASE);
     #endif
-
     //
     // C2000Ware Library initialization
     //
     C2000Ware_libraries_init();
-
     //
     // Enable Global Interrupt (INTM) and real time interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     while(1)
     {
         //
         // Send the character
         //
         UART_writeChar(myUART0_BASE, sData);
-
         //
         // Block until data is received and then return it.
         //
@@ -151,7 +137,6 @@ void main(void)
         // in case of external loopback.
         //
         rData = UART_readChar(myUART0_BASE);
-
         //
         // Check received data against sent data
         //
@@ -165,12 +150,10 @@ void main(void)
             // ESTOP0;
             for (;;);
         }
-
         //
         // Move to the next character and repeat the test
         //
         sData++;
-
         //
         // Limit the character to 8-bits
         //
@@ -178,7 +161,6 @@ void main(void)
         loopCount++;
     }
 }
-
 //
 // End of File
 //

@@ -72,73 +72,60 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //#############################################################################
-
 //
 // Included Files
 //
 #include <stdint.h>
 #include <stdbool.h>
-
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
 //
 // Function Prototypes
 //
 __interrupt void UART_RX_IntHandler(void);
-
 //
 // Main
 //
 void main(void)
 {
-
     //
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pull-ups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // PinMux and Peripheral Initialization
     //
     Board_init();
-
     //
     // Enable Global Interrupt (INTM) and real time interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     // 
     // Put a character to show start of example.  This will display on the
     // terminal.
     //
     UART_writeChar(myUART0_BASE, '!');
     UART_writeChar(myUART0_BASE, '!');
-
     //
     // FIFO receive interrupt configuration
     //
     UART_clearInterruptStatus(myUART0_BASE, UART_INT_RX | UART_INT_RT);   
     UART_enableInterrupt(myUART0_BASE, UART_INT_RX);
-
     //
     // Loop forever echoing data through the UART.
     //
@@ -146,22 +133,17 @@ void main(void)
     {
     }
 }
-
-
 __interrupt void UART_RX_IntHandler(void)
 {
     uint32_t ui32Status;
-
     //
     // Get the interrupt status.
     //
     ui32Status = UART_getInterruptStatus(myUART0_BASE, UART_RAW_INT);
-
     //
     // Clear the asserted interrupts.
     //
     UART_clearInterruptStatus(myUART0_BASE, ui32Status);
-
     //
     // Loop while there are characters in the receive FIFO.
     //
@@ -173,13 +155,10 @@ __interrupt void UART_RX_IntHandler(void)
         UART_writeCharNonBlocking(myUART0_BASE,
                                   UART_readCharNonBlocking(myUART0_BASE));
     }
-
     // Clear UART and PIPE interrupts
     UART_clearGlobalInterruptFlag(myUART0_BASE);
     Interrupt_clearACKGroup(INT_myUART0_INTERRUPT_ACK_GROUP);
-
 }
-
 //
 // End of File
 //

@@ -99,84 +99,68 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //#############################################################################
-
 //
 // Included Files
 //
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
 #define MAX_TRIP_ISR_COUNT 10U
 //
 // Global Variables
 //
 volatile uint32_t gTripIsrCount = 0;
-
 __interrupt void INT_myMCPWM0_ISR(void);
 __interrupt void INT_myMCPWM1_ISR(void);
-
 void main(void)
 {
     //
     // Initialize global variables
     //
-
     //
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pull-ups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Disable sync(Freeze clock to PWM as well)
     //
     SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Configure mcpwm1, mcpwm2
     //
     Board_init();
-
     //
     // Enable sync and clock to PWM
     //
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Enable Global Interrupt (INTM) and real time interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     //
     // IDLE loop. Just sit and loop forever (optional):
     //
     for(;;)
     {   
-
         // Toggle the GPIO with Delay
         GPIO_togglePin(myGPIO0);
         DEVICE_DELAY_US(1000000);
-        
     }
 }
-
 //
 // Interrupt Service Routine for myMCPWM0 CBC Trip
 //
@@ -186,45 +170,35 @@ __interrupt void INT_myMCPWM0_ISR(void)
     // This is a status Flag set to know which Trip is triggered.
     //
     volatile uint32_t tripFalg = MCPWM_getTripZoneFlagStatus(myMCPWM0_BASE);
-    
     //
     // Clear the Trip flag
     //
     MCPWM_clearTripZoneFlagStatus(myMCPWM0_BASE, tripFalg);
-
     /* switch case on the trip flag to perform action related to the trip */
-
     //
     // Clear Gloabl Interrupt Flag
     //
     MCPWM_clearInterrupt(myMCPWM0_BASE, MCPWM_INT_TZ_CBC);
-    
     // 
     // Clear the Global Interrupt Flag for myMCPWM0 to let the ISR trigger again.
     //
     MCPWM_clearGlobalInterrupt(myMCPWM0_BASE);
-
     gTripIsrCount++;
 }
-
-
 //
 // Interrupt Service Routine for myMCPWM1 OneShot Trip
 //
 __interrupt void INT_myMCPWM1_ISR(void)
 {   
-
     //
     // This is a status Flag set to know which Trip is triggered.
     //
     volatile uint32_t tripFalg = MCPWM_getTripZoneFlagStatus(myMCPWM1_BASE);
-    
     //
     // switch case on the trip flag to perform action related to the trip
     // Clear the Trip flag
     //
     MCPWM_clearTripZoneFlagStatus(myMCPWM1_BASE, tripFalg);
-
     //
     // wait for gTripIsrCount > MAX_TRIP_ISR_COUNT and then clear the OneShot Trip
     //
@@ -243,15 +217,12 @@ __interrupt void INT_myMCPWM1_ISR(void)
         // Do Nothing
         //
     }
-
     //
     // Clear the Global Interrupt Flag for myMCPWM1 to let the ISR trigger again.
     //
     MCPWM_clearGlobalInterrupt(myMCPWM1_BASE);
-
     //
     // Clear Interrupt
     //
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP2);
-
 }

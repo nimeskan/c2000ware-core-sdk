@@ -59,14 +59,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //#############################################################################
-
 //
 // Included Files
 //
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
 //
 // Defines
 //
@@ -74,7 +72,6 @@
 #define PWM1_TIMER_MAX     8000U
 #define MCPWM_TIMER_UP      1U
 #define MCPWM_TIMER_DOWN    0U
-
 //
 // Globals
 //
@@ -85,14 +82,12 @@ volatile uint32_t cap2Count;
 volatile uint32_t cap3Count;
 volatile uint32_t cap4Count;
 volatile uint16_t MCPWM1PeriodCount;
-
 //
 // Function Prototypes
 //
 void error(void);
 void initECAP(void);
 void initMCPWM(void);
-
 //
 // Main
 //
@@ -102,23 +97,19 @@ void main(void)
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pullups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Configure GPIO0/1 as MCPWM1A/1B
     //
@@ -126,19 +117,16 @@ void main(void)
     GPIO_setPinConfig(GPIO_0_MCPWM1_1A);
     GPIO_setPadConfig(1,GPIO_PIN_TYPE_STD);
     GPIO_setPinConfig(GPIO_1_MCPWM1_1B);
-
     //
     // Board initialization
     // Configure GPIO 16 as eCAP input
     // Enable interrupts required for this example
     //
     Board_init();
-    
     //
     // Configure MCPWM
     //
     initMCPWM();
-
     //
     // Initialize counters:
     //
@@ -148,13 +136,11 @@ void main(void)
     ecap1IntCount = 0U;
     ecap1PassCount = 0U;
     MCPWM1PeriodCount = 0U;
-
     //
     // Enable Global Interrupt (INTM) and Real time interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     //
     // Loop forever. Suspend or place breakpoints to observe the buffers.
     //
@@ -163,7 +149,6 @@ void main(void)
        NOP;
     }
 }
-
 //
 // initMCPWM - Configure MCPWM
 //
@@ -173,7 +158,6 @@ void initMCPWM()
     // Disable sync(Freeze clock to PWM as well)
     //
     SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Configure MCPWM
     //       Counter runs in up-count mode.
@@ -181,23 +165,18 @@ void initMCPWM()
     //
     MCPWM_setTimeBaseCounterMode(PWM1_BASE, MCPWM_COUNTER_MODE_UP);
     MCPWM_setTimeBasePeriodShadow(PWM1_BASE, PWM1_TIMER_MIN);
-
     MCPWM_setActionQualifierActionCompleteShadow(PWM1_BASE, MCPWM_AQ_OUTPUT_1A,
     MCPWM_AQ_OUTPUT_NO_CHANGE_ZERO | MCPWM_AQ_OUTPUT_TOGGLE_PERIOD 
     | MCPWM_AQ_OUTPUT_NO_CHANGE_UP_CMPA | MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPA 
     | MCPWM_AQ_OUTPUT_NO_CHANGE_UP_CMPB | MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPB);
-
     MCPWM_setClockPrescaler(PWM1_BASE,
                             MCPWM_CLOCK_DIVIDER_2);
-
     MCPWM1TimerDirection = MCPWM_TIMER_UP;
-
     //
     // Enable sync and clock to PWM
     //
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
 }
-
 //
 // myECAP0 ISR
 //
@@ -210,32 +189,26 @@ __interrupt void INT_myECAP0_ISR(void)
     cap2Count = ECAP_getEventTimeStamp(myECAP0_BASE, ECAP_EVENT_2);
     cap3Count = ECAP_getEventTimeStamp(myECAP0_BASE, ECAP_EVENT_3);
     cap4Count = ECAP_getEventTimeStamp(myECAP0_BASE, ECAP_EVENT_4);
-
     //
     // Compare the period value with the captured count
     //
     MCPWM1PeriodCount = MCPWM_getTimeBasePeriodShadow(PWM1_BASE);
-
     if(cap2Count > ((MCPWM1PeriodCount *2) + 2U) ||
        cap2Count < ((MCPWM1PeriodCount *2) - 2U))
     {
         error();
     }
-
     if(cap3Count > ((MCPWM1PeriodCount *2) + 2U) ||
        cap3Count < ((MCPWM1PeriodCount *2) - 2U))
     {
         error();
     }
-
     if(cap4Count > ((MCPWM1PeriodCount *2) + 2U) ||
        cap4Count < ((MCPWM1PeriodCount *2) - 2U))
     {
         error();
     }
-
     ecap1IntCount++;
-
     //
     // Keep track of the MCPWM direction and adjust period accordingly to
     // generate a variable frequency PWM.
@@ -264,29 +237,24 @@ __interrupt void INT_myECAP0_ISR(void)
            MCPWM_setTimeBasePeriodShadow(PWM1_BASE, ++MCPWM1PeriodCount);
         }
     }
-
     //
     // Count correct captures
     //
     ecap1PassCount++;
-
     //
     // Clear interrupt flags for more interrupts.
     //
     ECAP_clearInterrupt(myECAP0_BASE,ECAP_ISR_SOURCE_CAPTURE_EVENT_4);
     ECAP_clearGlobalInterrupt(myECAP0_BASE);
-
     //
     // Start eCAP
     //
     ECAP_reArm(myECAP0_BASE);
-
     //
     // Acknowledge the group interrupt for more interrupts.
     //
     Interrupt_clearACKGroup(INT_myECAP0_INTERRUPT_ACK_GROUP);
 }
-
 //
 // error - Error function
 //

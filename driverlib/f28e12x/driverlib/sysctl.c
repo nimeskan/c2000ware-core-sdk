@@ -253,10 +253,11 @@ SysCtl_setClock(uint32_t oscSource, Sysctl_PLLConfig pllConfig,
     if(SysCtl_isMCDClockFailureDetected())
     {
         //
-        // OSCCLKSRC2 failure detected. Returning false. You'll need to clear
-        // the MCD error.
+        // If the code is stuck here, OSCCLKSRC2 failure is detected. 
+        // Returning false. You'll need to clear the MCD error.
         //
         status = false;
+        ESTOP0;
     }
     else
     {
@@ -685,6 +686,55 @@ SysCtl_selectOscSource(uint32_t oscSource)
         default:
             //
             // Do nothing. Not a valid oscSource value.
+            //
+            break;
+    }
+    EDIS;
+}
+
+
+//*****************************************************************************
+//
+// SysCtl_selectWatchdogclkSource()
+//
+//*****************************************************************************
+void
+SysCtl_selectWatchdogclkSource(uint32_t secclkSource)
+{
+    ASSERT((secclkSource == SYSCTL_SECCLKSRC_WROSCDIV8) ||
+           (secclkSource == SYSCTL_SECCLKSRC_SYSOSCDIV4));
+
+    //
+    // Select the specified source.
+    //
+    EALLOW;
+    switch(secclkSource)
+    {
+        case SYSCTL_SECCLKSRC_WROSCDIV8:
+            //
+            // Clk Src = WROSCDIV8
+            //
+            HWREGH(CLKCFG_BASE + SYSCTL_O_CLKSRCCTL1) &=
+                ~SYSCTL_CLKSRCCTL1_SECCLKSRCSEL;
+
+            SYSCTL_CLKSRCCTL_DELAY;
+            break;
+
+        case SYSCTL_SECCLKSRC_SYSOSCDIV4:
+            //
+            // Select SYSOSCDIV4 and wait for it to power up
+            //
+
+            HWREGH(CLKCFG_BASE + SYSCTL_O_CLKSRCCTL1) |=
+                SYSCTL_CLKSRCCTL1_SECCLKSRCSEL;
+            
+            SYSCTL_CLKSRCCTL_DELAY;
+
+            break;
+
+            default:
+            //
+            // Do nothing. Not a valid secclkSource value.
             //
             break;
     }

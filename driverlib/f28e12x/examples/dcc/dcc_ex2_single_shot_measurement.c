@@ -68,43 +68,36 @@
 //
 #include "driverlib.h"
 #include "device.h"
-
 //
 // Defines
 //
 #define PASS 0
 #define FAIL 1
-
 //
 // Globals
 //
 uint32_t  result     = FAIL;
 float32_t meas_freq1 = 0.0F;
-
 void main(void)
 {
     //
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     //
     // Measure the frequency of SYSOSCDIV4 using XTAL as reference clock
     // Clk1 = SYSOSCDIV4
@@ -117,7 +110,6 @@ void main(void)
                                           DCC_COUNT1SRC_SYSOSCDIV4,
                                           DCC_COUNT0SRC_XTAL, 20.0F,
                                           1.0F, 0.0F, 160.0F);
-
     //
     // Measured clock frequency of SYSOSCDIV4.
     // Value of SYSOSCDIV4 freq can be checked in the device datasheet
@@ -130,8 +122,5 @@ void main(void)
     {
         result = FAIL;
     }
-
-
-
     ESTOP0;
 }

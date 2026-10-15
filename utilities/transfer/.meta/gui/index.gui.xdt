@@ -516,7 +516,7 @@
                     <gc-widget-label label="Sort By"></gc-widget-label>
                     <gc-widget-select id="rt_logger_sort_by_column" labels=",Frame Type,User Data,Data Words,CRC,Frame Tag" values=",frame_type,user_data,data_words,crc,frame_tag" selected-index="0" initial-index="0"></gc-widget-select>
                     <gc-widget-input-filter id="rt_logger_filter_text" placeholder="Entries include this text" has-clear-icon has-search-icon hidden info-text="The selected Filter/Sort by column entries get filtered to show only the entries that include the text entered in this input box"></gc-widget-input-filter>
-                    <gc-widget-checkbox id="rt_logger_sort_descending" label="Sort Decending"></gc-widget-checkbox>
+                    <gc-widget-checkbox id="rt_logger_sort_descending" label="Sort Descending"></gc-widget-checkbox>
                     <gc-widget-select id="rt_logger_export_mode" labels="JSON,CSV" values="json,csv" selected-index="0" initial-index="0"></gc-widget-select>
                     <gc-widget-button id="rt_logger_export" label="Export"></gc-widget-button>
                     <gc-widget-checkbox id="rt_logger_hide" label="Hide Table"></gc-widget-checkbox>

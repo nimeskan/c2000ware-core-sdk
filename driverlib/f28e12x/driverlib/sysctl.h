@@ -193,6 +193,24 @@ extern "C"
 #define SYSCTL_OSCSRC_XTAL_SE           0x03U
 //! Wide-range oscillator by 8 (WROSCDIV8)
 #define SYSCTL_OSCSRC_WROSCDIV8       0x02UL
+
+
+//
+// Secondary Clock source
+//
+// Also used with the SysCtl_selectWatchdogclkSource() as the secclkSource parameter.
+//
+#define SYSCTL_SECCLKSRC_M                 0x01UL // Mask for SECCLKSRC value in config
+#define SYSCTL_SECCLKSRC_S                 2U     // Shift for SECCLKSRC value in config
+//! WROSCDIV8
+#define SYSCTL_SECCLKSRC_WROSCDIV8       0x00UL
+//! SYSOSCDIV4
+#define SYSCTL_SECCLKSRC_SYSOSCDIV4         0x01UL
+
+//*****************************************************************************
+
+
+
 //*****************************************************************************
 //
 //! The following are values that can be passed to Sysctl_setClock() as
@@ -3348,6 +3366,23 @@ SysCtl_selectXTALSingleEnded(void);
 //*****************************************************************************
 extern void
 SysCtl_selectOscSource(uint32_t oscSource);
+
+
+//*****************************************************************************
+//
+//! Selects the clock source for watchdog timer of the device.
+//!
+//! \param secclkSource is the watchdog clock source to be configured.
+//!
+//! This function configures the oscillator to be used in the clocking of the
+//! watchdog clock of the device. The \e secclkSource parameter may take a value of
+//! \b SYSCTL_SECCLKSRC_WROSCDIV8, or \b SYSCTL_SECCLKSRC_SYSOSCDIV4.
+//!
+//! \return None.
+//
+//*****************************************************************************
+extern void
+SysCtl_selectWatchdogclkSource(uint32_t secclkSource);
 
 //*****************************************************************************
 //

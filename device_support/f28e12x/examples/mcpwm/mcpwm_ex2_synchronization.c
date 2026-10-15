@@ -45,12 +45,10 @@
 //!     - gPhaseDirUp          - true to use up phase shift value, false for down phase shift value.
 //
 //#############################################################################
-
 //
 // Included Files
 //
 #include "f28x_project.h"
-
 // 
 // Runtime update value for the phase shift value and observations
 // default this value is set to false, and hence the phase shift value 
@@ -59,14 +57,12 @@
 volatile bool gUsePhaseValueUpdate = false;
 volatile uint16_t gPhaseShiftValue = 0;
 volatile bool gPhaseDirUp = true;
-
 //
 // Function Prototypes
 //
 __interrupt void INT_myMCPWM0_ISR(void);
 void initMyMCPWM0(void);
 void initMyMCPWM1(void);
-
 void main(void)
 {
     //
@@ -75,7 +71,6 @@ void main(void)
     // This example function is found in the f2838x_sysctrl.c file.
     //
     InitSysCtrl();
-
     //
     // For this case just init GPIO pins for mcpwm1, mcpwm3
     // These functions are in the f2838x_mcpwm.c file
@@ -83,13 +78,11 @@ void main(void)
     InitGpio();
     InitMcpwm1Gpio();
     InitMcpwm3Gpio();
-
     //
     // Step 3. Clear all interrupts and initialize PIE vector table:
     // Disable CPU interrupts
     //
     DINT;
-
     //
     // Initialize the PIE control registers to their default state.
     // The default state is all PIE interrupts disabled and flags
@@ -97,13 +90,11 @@ void main(void)
     // This function is found in the f2838x_piectrl.c file.
     //
     InitPieCtrl();
-
     //
     // Disable CPU interrupts and clear all CPU interrupt flags:
     //
     IER = 0x0000;
     IFR = 0x0000;
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
@@ -113,25 +104,21 @@ void main(void)
     // This function is found in f2838x_pievect.c.
     //
     InitPieVectTable();
-
     //
     // Register interrupt handlers
     //
     EALLOW;
     PieVectTable.MCPWM1_INT = &INT_myMCPWM0_ISR;
     EDIS;
-
     //
     // Disable sync(Freeze clock to PWM as well)
     //
     CpuSysRegs.PERCLKCR.bit.TBCLKSYNC = 0;
-
     //
     // Initialize MCPWM modules
     //
     initMyMCPWM0();
     initMyMCPWM1();
-
     //
     // Clear any pending interrupts
     //
@@ -139,29 +126,24 @@ void main(void)
     Pwm1Regs.INTCLR.bit.ET2 = 1;
     Pwm1Regs.INTCLR.bit.INT = 1;
     EDIS;
-
     //
     // Enable PWM interrupts
     //
     IER |= M_INT2;  // Enable group 2 interrupts (MCPWM1)
-
     //
     // Enable MCPWM interrupts
     //
     PieCtrlRegs.PIECTRL.bit.ENPIE = 1;          // Enable the PIE block
     PieCtrlRegs.PIEIER2.bit.INTx4 = 1;          // mcpwm1 group 2, int 4
-
     //
     // Enable global interrupts and real-time debug
     //
     EINT;
     ERTM;
-
     //
     // Enable sync clock
     //
     CpuSysRegs.PERCLKCR.bit.TBCLKSYNC = 1;
-
     //
     // IDLE loop
     //
@@ -170,7 +152,6 @@ void main(void)
         asm ("  NOP");
     }
 }
-
 //
 // initMyMCPWM0 - Initialize MCPWM1 module
 //
@@ -191,29 +172,24 @@ void initMyMCPWM0(void)
     Pwm1Regs.TBCTL.bit.PHSEN = TB_PHASE_ENABLE;    
     Pwm1Regs.TBCTL.bit.SYNCOSEL = SYNCPERSEL_SOURCE_PERIOD;  
     Pwm1Regs.TBCTL.bit.SYNCISEL = SYNC_IN_PULSE_SRC_INPUTXBAR_OUT5; 
-    
     //
     // Period and Compare Values - Using shadow registers
     //
     Pwm1Regs.TBPRDS.bit.TBPRDS = 15999;            // 10kHz
     Pwm1Regs.PWM1_CMPAS.bit.PWM1_CMPAS = 8000;     // 50% duty
     Pwm1Regs.PWM1_CMPBS.bit.PWM1_CMPBS = 8000;     // 50% duty
-
     //
     // Action Qualifier - Only PWM1 used
     //
     Pwm1Regs.PWM1_AQCTLAS.bit.ZRO = AQ_SET;        
     Pwm1Regs.PWM1_AQCTLAS.bit.CAU = AQ_CLEAR;      
-
     Pwm1Regs.PWM1_AQCTLBS.bit.ZRO = AQ_SET;        
     Pwm1Regs.PWM1_AQCTLBS.bit.CBU = AQ_CLEAR;      
-
     //
     // Event Trigger Configuration
     //
     Pwm1Regs.ETSEL.bit.ET2_SEL = EVT_TBCTR_PERIOD; 
     Pwm1Regs.ETPERIOD.bit.ET2_PERIOD = 5;          
-
     //
     // Enable ET2 Interrupt
     //
@@ -221,7 +197,6 @@ void initMyMCPWM0(void)
     Pwm1Regs.INTEN.bit.ET2 = INT_ENABLE;
     EDIS;
 }
-
 //
 // initMyMCPWM1 - Initialize MCPWM3 module
 //
@@ -242,24 +217,20 @@ void initMyMCPWM1(void)
     Pwm3Regs.TBCTL.bit.PHSEN = TB_PHASE_ENABLE;    
     Pwm3Regs.TBCTL.bit.PHSDIR = TB_UP;             
     Pwm3Regs.TBCTL.bit.SYNCISEL = SYNC_IN_PULSE_SRC_SYNCOUT_MCPWM1;
-
     //
     // Period and Compare Values - Using shadow registers
     //
     Pwm3Regs.TBPRDS.bit.TBPRDS = 8000;             // 10kHz
     Pwm3Regs.PWM1_CMPAS.bit.PWM1_CMPAS = 4000;     // 50% duty
     Pwm3Regs.PWM1_CMPBS.bit.PWM1_CMPBS = 4000;     // 50% duty
-
     //
     // Action Qualifier - Only PWM1 used
     //
     Pwm3Regs.PWM1_AQCTLAS.bit.ZRO = AQ_SET;        
     Pwm3Regs.PWM1_AQCTLAS.bit.CAU = AQ_CLEAR;      
-
     Pwm3Regs.PWM1_AQCTLBS.bit.ZRO = AQ_SET;        
     Pwm3Regs.PWM1_AQCTLBS.bit.CBU = AQ_CLEAR;      
 }
-
 //
 // INT_myMCPWM0_ISR - MCPWM0 ISR 
 // 
@@ -269,16 +240,13 @@ __interrupt void INT_myMCPWM0_ISR(void)
     {
         // Update phase shift value
         Pwm3Regs.TBPHS.bit.TBPHS = gPhaseShiftValue;
-
         // Update counter mode after sync if needed
         Pwm3Regs.TBCTL.bit.PHSDIR = (gPhaseDirUp) ? TB_UP : TB_DOWN;
     }
-
     // Clear interrupt flags
     EALLOW;
     Pwm1Regs.INTCLR.bit.ET2 = 1;
     Pwm1Regs.INTCLR.bit.INT = 1;
     EDIS;
-
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;
 }

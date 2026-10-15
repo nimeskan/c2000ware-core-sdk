@@ -113,16 +113,13 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //#############################################################################
-
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
 //
 // Globals
 //
 uint16_t perform_one_shot_load = 0;
-
 //
 // Main
 //
@@ -132,44 +129,36 @@ void main(void)
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Initialize GPIO and configure the GPIO pin as a push-pull output
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Disable sync(Freeze clock to PWM)
     //
     SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Configure MCPWMs
     //
     Board_init();
-
     //
     // Enable sync and clock to PWM
     //
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     //
     // IDLE loop
     //
@@ -183,40 +172,30 @@ void main(void)
             MCPWM_setCounterCompareShadowValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_1A, 2000);
             MCPWM_setCounterCompareShadowValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_2A, 3333); 
             MCPWM_setCounterCompareShadowValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_3A, 667);  
-
             MCPWM_setCounterCompareShadowValue(myMCPWM1_BASE, MCPWM_COUNTER_COMPARE_1A, 2000);
-
             //
             // Change Action Qualifier shadow settings for all pairs in MCPWM1 and MCPWM3
             //
             MCPWM_setActionQualifierActionShadow(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_1A, MCPWM_AQ_OUTPUT_LOW,  MCPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
             MCPWM_setActionQualifierActionShadow(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_1A, MCPWM_AQ_OUTPUT_HIGH, MCPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
-            
             MCPWM_setActionQualifierActionShadow(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_2A, MCPWM_AQ_OUTPUT_LOW,  MCPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
             MCPWM_setActionQualifierActionShadow(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_2A, MCPWM_AQ_OUTPUT_HIGH, MCPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
-            
             MCPWM_setActionQualifierActionShadow(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_3A, MCPWM_AQ_OUTPUT_LOW,  MCPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
             MCPWM_setActionQualifierActionShadow(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_3A, MCPWM_AQ_OUTPUT_HIGH, MCPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
-            
-            
             MCPWM_setActionQualifierActionShadow(myMCPWM1_BASE, MCPWM_AQ_OUTPUT_3A, MCPWM_AQ_OUTPUT_LOW,  MCPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
             MCPWM_setActionQualifierActionShadow(myMCPWM1_BASE, MCPWM_AQ_OUTPUT_3A, MCPWM_AQ_OUTPUT_HIGH, MCPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
-
             //
             // Update Deadband shadow parameters (example: increase to 300ns)
             //
             MCPWM_setRisingEdgeDelayCountShadow(myMCPWM0_BASE, 48);  // 300ns @ 160MHz
             MCPWM_setFallingEdgeDelayCountShadow(myMCPWM0_BASE, 48); // 300ns @ 160MHz
-
             MCPWM_setRisingEdgeDelayCountShadow(myMCPWM1_BASE, 48);  // 300ns @ 160MHz
             MCPWM_setFallingEdgeDelayCountShadow(myMCPWM1_BASE, 48); // 300ns @ 160MHz
-
             //
             // Trigger global load - will update all shadow registers
             //
             MCPWM_setGlobalLoadOneShotLatch(myMCPWM0_BASE);
             MCPWM_setGlobalLoadOneShotLatch(myMCPWM1_BASE);
-
             //
             // Clear the flag
             //

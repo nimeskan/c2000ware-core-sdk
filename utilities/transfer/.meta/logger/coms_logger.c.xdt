@@ -182,7 +182,6 @@ void COMSLOG_init()
 {
     uint16_t initI = 0;
     uint16_t initJ = 0;
-
     //
     // Initialize the HW module (The functions below are also called in Board_init)
     //
@@ -197,7 +196,6 @@ void COMSLOG_init()
         }
     }
     
-
     TransferRingBuffer_init(
         `comsLinkBufferModule.$name`_Handle, 
         (char**)`comsLinkBufferModule.$name`_buffer, 
@@ -212,7 +210,7 @@ void COMSLOG_init()
             `comsLinkBufferModule.$name`_tagUdata_buffer[initI][initJ] = 0;
         }
     }
-
+    
     TransferRingBuffer_init(
         `comsLinkBufferModule.$name`_tagUdata_Handle, 
         (char**)`comsLinkBufferModule.$name`_tagUdata_buffer, 

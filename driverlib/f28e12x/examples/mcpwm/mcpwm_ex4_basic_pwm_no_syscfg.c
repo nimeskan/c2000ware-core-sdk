@@ -88,25 +88,21 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //#############################################################################
-
 //
 // Included Files
 //
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
 //
 // Globals
 //
 uint16_t gMcpwm0Period;
 uint16_t gMcpwm1Period;
-
 uint16_t gMcpwm0CmpA;
 uint16_t gMcpwm0CmpB;
 uint16_t gMcpwm1CmpA;
 uint16_t gMcpwm1CmpB;
-
 //
 // Macros
 //
@@ -115,7 +111,6 @@ uint16_t gMcpwm1CmpB;
 #define APP_CMPB_MIN_PERCENT_PERIOD (50.0f)
 #define APP_CMPB_MAX_PERCENT_PERIOD (90.0f)
 #define APP_CMP_UPDATE_STEP_PERCENT_PERIOD (5.0f)
-
 //
 // Function Prototypes
 //
@@ -125,76 +120,59 @@ void configureMcpwmPinmux(void);
 void initMyMCPWM0(void);
 void initMyMCPWM1(void);
 void registerMcpwmInterrupts(void);
-
 // Interrupt Settings for INT_myMCPWM0
 // ISR need to be defined for the registered interrupts
 #define INT_myMCPWM0                        INT_MCPWM1
 #define INT_myMCPWM0_INTERRUPT_ACK_GROUP    INTERRUPT_ACK_GROUP2
-
 // Interrupt Settings for INT_myMCPWM1
 // ISR need to be defined for the registered interrupts
 #define INT_myMCPWM1                        INT_MCPWM3
 #define INT_myMCPWM1_INTERRUPT_ACK_GROUP    INTERRUPT_ACK_GROUP3
-
 #define myMCPWM0_BASE                       PWM1_BASE
 #define myMCPWM1_BASE                       PWM3_BASE
-
 void main(void)
 {
     //
     // Initialize global variables
     //
-
     //
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pull-ups.
     //
     Device_initGPIO();
-   
     //
     // Confiugure the pin mux for the MCPWM pins
     //
     configureMcpwmPinmux();
-
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Disable sync(Freeze clock to PWM as well)
     //
     SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     Board_init();
     registerMcpwmInterrupts();
-    
     //
     // initialize MCPWMs
     //
     initMyMCPWM0();
     initMyMCPWM1();
-
     MCPWM_clearInterrupt(myMCPWM0_BASE, MCPWM_INT_ET_1);
     MCPWM_clearGlobalInterrupt(myMCPWM0_BASE);
-
     MCPWM_clearInterrupt(myMCPWM1_BASE, MCPWM_INT_ET_1);
     MCPWM_clearGlobalInterrupt(myMCPWM1_BASE);
-
     Interrupt_enable(INT_myMCPWM0);
     Interrupt_enable(INT_myMCPWM1);
-
     //
     // get the Configuration info for updates
     // Note if the shadow registers were used in the init configuration, 
@@ -207,18 +185,15 @@ void main(void)
     gMcpwm0CmpB   = MCPWM_getCounterCompareActiveValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_1B);
     gMcpwm1CmpA   = MCPWM_getCounterCompareActiveValue(myMCPWM1_BASE, MCPWM_COUNTER_COMPARE_1A);
     gMcpwm1CmpB   = MCPWM_getCounterCompareActiveValue(myMCPWM1_BASE, MCPWM_COUNTER_COMPARE_1B);
-
     //
     // Enable sync and clock to PWM
     //
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Enable Global Interrupt (INTM) and real time interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     //
     // IDLE loop. Just sit and loop forever (optional):
     //
@@ -227,13 +202,11 @@ void main(void)
         NOP;
     }
 }
-
 //
 // INT_myMCPWM0_ISR - mcpwm0 ISR
 //
 __interrupt void INT_myMCPWM0_ISR(void)
 {
-    
     //
     // Alternatively, we can get the current Active and Shadow values of the CMPx registers using
     // MCPWM_getCounterCompareActiveValue() and MCPWM_getCounterCompareShadowValue() respectively and
@@ -242,22 +215,18 @@ __interrupt void INT_myMCPWM0_ISR(void)
     // For this example we are using a common CMPA and CMPB values for all PWM1,2,3 of myMCPWM0
     // hence, using a common variable instead of get API everytime.
     // 
-    
     uint16_t minCmpAValue = (uint16_t) ((APP_CMPA_MIN_PERCENT_PERIOD * ((float)gMcpwm0Period))/100.0);
     uint16_t maxCmpAValue = (uint16_t) ((APP_CMPA_MAX_PERCENT_PERIOD * ((float)gMcpwm0Period))/100.0);
     uint16_t minCmpBValue = (uint16_t) ((APP_CMPB_MIN_PERCENT_PERIOD * ((float)gMcpwm0Period))/100.0);
     uint16_t maxCmpBValue = (uint16_t) ((APP_CMPB_MAX_PERCENT_PERIOD * ((float)gMcpwm0Period))/100.0);
-
     gMcpwm0CmpA += (uint16_t) ((APP_CMP_UPDATE_STEP_PERCENT_PERIOD * ((float)gMcpwm0Period))/100.0);
     gMcpwm0CmpB += (uint16_t) ((APP_CMP_UPDATE_STEP_PERCENT_PERIOD * ((float)gMcpwm0Period))/100.0);
-
     if(gMcpwm0CmpA > maxCmpAValue){
         gMcpwm0CmpA = minCmpAValue;
     }
     if(gMcpwm0CmpB > maxCmpBValue){
         gMcpwm0CmpB = minCmpBValue;
     }
-
     //
     // Note that these updates may be interrupted by a higher priority interrupt or,
     // the updates may happen across a period event (or action events selected). Such 
@@ -273,53 +242,43 @@ __interrupt void INT_myMCPWM0_ISR(void)
     MCPWM_setCounterCompareActiveValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_2B, gMcpwm0CmpB);
     MCPWM_setCounterCompareActiveValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_3A, gMcpwm0CmpA);
     MCPWM_setCounterCompareActiveValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_3B, gMcpwm0CmpB);
-
     //
     // Clear the interrupt flags. 
     // to clear all flags, MCPWM_INT_SOURCE_ALL may be used as arg.
     //
     MCPWM_clearInterrupt(myMCPWM0_BASE, MCPWM_INT_ET_1);
-
     //
     // Clear the global interrupt flag. Only with this flag clear, 
     // will the next interrupt be received.
     //
     MCPWM_clearGlobalInterrupt(myMCPWM0_BASE);
-
-
     //
     // Acknowledge this interrupt to receive more interrupts from group
     //
     Interrupt_clearACKGroup(INT_myMCPWM0_INTERRUPT_ACK_GROUP);
 }
-
 //
 // INT_myMCPWM1_ISR - myMCPWM1 ISR
 //
 __interrupt void INT_myMCPWM1_ISR(void)
 {
-
     //
     // Alternatively, we can get the current Active and Shadow values of the CMPx registers using
     // MCPWM_getCounterCompareActiveValue() and MCPWM_getCounterCompareShadowValue() respectively and
     // use for the calculation. 
     //  
-    
     uint16_t minCmpAValue = (uint16_t) ((APP_CMPA_MIN_PERCENT_PERIOD * ((float)gMcpwm1Period))/100.0);
     uint16_t maxCmpAValue = (uint16_t) ((APP_CMPA_MAX_PERCENT_PERIOD * ((float)gMcpwm1Period))/100.0);
     uint16_t minCmpBValue = (uint16_t) ((APP_CMPB_MIN_PERCENT_PERIOD * ((float)gMcpwm1Period))/100.0);
     uint16_t maxCmpBValue = (uint16_t) ((APP_CMPB_MAX_PERCENT_PERIOD * ((float)gMcpwm1Period))/100.0);
-
     gMcpwm1CmpA += (uint16_t) ((APP_CMP_UPDATE_STEP_PERCENT_PERIOD * ((float)gMcpwm1Period))/100.0);
     gMcpwm1CmpB += (uint16_t) ((APP_CMP_UPDATE_STEP_PERCENT_PERIOD * ((float)gMcpwm1Period))/100.0);
-
     if(gMcpwm1CmpA > maxCmpAValue){
         gMcpwm1CmpA = minCmpAValue;
     }
     if(gMcpwm1CmpB > maxCmpBValue){
         gMcpwm1CmpB = minCmpBValue;
     }
-
     //
     // Note that these updates may be interrupted by a higher priority interrupt or,
     // the updates may happen across a period event (or action events selected). Such 
@@ -331,26 +290,21 @@ __interrupt void INT_myMCPWM1_ISR(void)
     //
     MCPWM_setCounterCompareActiveValue(myMCPWM1_BASE, MCPWM_COUNTER_COMPARE_1A, gMcpwm1CmpA);
     MCPWM_setCounterCompareActiveValue(myMCPWM1_BASE, MCPWM_COUNTER_COMPARE_1B, gMcpwm1CmpB);
-
     //
     // Clear the interrupt flags. 
     // to clear all flags, MCPWM_INT_SOURCE_ALL may be used as arg.
     //
     MCPWM_clearInterrupt(myMCPWM1_BASE, MCPWM_INT_ET_1);
-
     //
     // Clear the global interrupt flag. Only with this flag clear, 
     // will the next interrupt be received.
     //
     MCPWM_clearGlobalInterrupt(myMCPWM1_BASE);
-
-
     //
     // Acknowledge this interrupt to receive more interrupts from group
     //
     Interrupt_clearACKGroup(INT_myMCPWM1_INTERRUPT_ACK_GROUP);
 }
-
 //
 // MCPWM1 -> myMCPWM0 Pinmux
 //
@@ -390,7 +344,6 @@ __interrupt void INT_myMCPWM1_ISR(void)
 #define GPIO_PIN_MCPWM1_3B 5
 #define myMCPWM0_MCPWM3B_GPIO 5
 #define myMCPWM0_MCPWM3B_PIN_CONFIG GPIO_5_MCPWM1_3B
-
 //
 // MCPWM3 -> myMCPWM1 Pinmux
 //
@@ -406,23 +359,19 @@ __interrupt void INT_myMCPWM1_ISR(void)
 #define GPIO_PIN_MCPWM3_1B 29
 #define myMCPWM1_MCPWM1B_GPIO 29
 #define myMCPWM1_MCPWM1B_PIN_CONFIG GPIO_29_MCPWM3_1B
-
 //
 // Interrupt Confiugrations
 //
 void registerMcpwmInterrupts(){
-    
     // Interrupt Settings for INT_myMCPWM0
     // ISR need to be defined for the registered interrupts
     Interrupt_register(INT_myMCPWM0, &INT_myMCPWM0_ISR);
     Interrupt_disable(INT_myMCPWM0);
-
     // Interrupt Settings for INT_myMCPWM1
     // ISR need to be defined for the registered interrupts
     Interrupt_register(INT_myMCPWM1, &INT_myMCPWM1_ISR);
     Interrupt_disable(INT_myMCPWM1);
 }
-
 //
 // App function configureMcpwmPinmux - to configure the Pinmux for the MCPWM outputs
 //
@@ -431,53 +380,42 @@ void configureMcpwmPinmux(void)
     //
     // Configure the Pinmux for the MCPWM outputs
     //
-
     //
     // MCPWM1 -> myMCPWM0 Pinmux
     //
     GPIO_setPinConfig(myMCPWM0_MCPWM1A_PIN_CONFIG);
     GPIO_setPadConfig(myMCPWM0_MCPWM1A_GPIO, GPIO_PIN_TYPE_STD);
     GPIO_setQualificationMode(myMCPWM0_MCPWM1A_GPIO, GPIO_QUAL_SYNC);
-
     GPIO_setPinConfig(myMCPWM0_MCPWM1B_PIN_CONFIG);
     GPIO_setPadConfig(myMCPWM0_MCPWM1B_GPIO, GPIO_PIN_TYPE_STD);
     GPIO_setQualificationMode(myMCPWM0_MCPWM1B_GPIO, GPIO_QUAL_SYNC);
-
     GPIO_setPinConfig(myMCPWM0_MCPWM2A_PIN_CONFIG);
     GPIO_setPadConfig(myMCPWM0_MCPWM2A_GPIO, GPIO_PIN_TYPE_STD);
     GPIO_setQualificationMode(myMCPWM0_MCPWM2A_GPIO, GPIO_QUAL_SYNC);
-
     GPIO_setPinConfig(myMCPWM0_MCPWM2B_PIN_CONFIG);
     GPIO_setPadConfig(myMCPWM0_MCPWM2B_GPIO, GPIO_PIN_TYPE_STD);
     GPIO_setQualificationMode(myMCPWM0_MCPWM2B_GPIO, GPIO_QUAL_SYNC);
-
     GPIO_setPinConfig(myMCPWM0_MCPWM3A_PIN_CONFIG);
     GPIO_setPadConfig(myMCPWM0_MCPWM3A_GPIO, GPIO_PIN_TYPE_STD);
     GPIO_setQualificationMode(myMCPWM0_MCPWM3A_GPIO, GPIO_QUAL_SYNC);
-
     GPIO_setPinConfig(myMCPWM0_MCPWM3B_PIN_CONFIG);
     GPIO_setPadConfig(myMCPWM0_MCPWM3B_GPIO, GPIO_PIN_TYPE_STD);
     GPIO_setQualificationMode(myMCPWM0_MCPWM3B_GPIO, GPIO_QUAL_SYNC);
-
     //
     // MCPWM3 -> myMCPWM1 Pinmux
     //
     GPIO_setPinConfig(myMCPWM1_MCPWM1A_PIN_CONFIG);
     GPIO_setPadConfig(myMCPWM1_MCPWM1A_GPIO, GPIO_PIN_TYPE_STD);
     GPIO_setQualificationMode(myMCPWM1_MCPWM1A_GPIO, GPIO_QUAL_SYNC);
-
     GPIO_setPinConfig(myMCPWM1_MCPWM1B_PIN_CONFIG);
     GPIO_setPadConfig(myMCPWM1_MCPWM1B_GPIO, GPIO_PIN_TYPE_STD);
     GPIO_setQualificationMode(myMCPWM1_MCPWM1B_GPIO, GPIO_QUAL_SYNC);
 }
-
 //
 // App function initMyMCPWM0 - to initialize the myMCPWM0
 //
 void initMyMCPWM0(){
-
     /* Commenting out the reset default configs */
-
     //
     // Load Mode configurations
     //
@@ -487,28 +425,22 @@ void initMyMCPWM0(){
     // - Action Qualifier Load Mode: Freeze shadow to active load
     // - Dead Band Load Mode: Freeze shadow to active load
     //
-
     MCPWM_disableGlobalLoad(myMCPWM0_BASE);
-
     MCPWM_setPeriodLoadMode(myMCPWM0_BASE, MCPWM_PERIOD_SHADOW_LOAD_DISABLE);
-
     MCPWM_setCounterCompareShadowLoadMode(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_1A, MCPWM_COMP_LOAD_FREEZE);
     MCPWM_setCounterCompareShadowLoadMode(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_1B, MCPWM_COMP_LOAD_FREEZE);
     MCPWM_setCounterCompareShadowLoadMode(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_2A, MCPWM_COMP_LOAD_FREEZE);
     MCPWM_setCounterCompareShadowLoadMode(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_2B, MCPWM_COMP_LOAD_FREEZE);
     MCPWM_setCounterCompareShadowLoadMode(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_3A, MCPWM_COMP_LOAD_FREEZE);
     MCPWM_setCounterCompareShadowLoadMode(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_3B, MCPWM_COMP_LOAD_FREEZE);
-
     MCPWM_setActionQualifierShadowLoadMode(myMCPWM0_BASE, MCPWM_ACTION_QUALIFIER_1A, MCPWM_AQ_LOAD_FREEZE);
     MCPWM_setActionQualifierShadowLoadMode(myMCPWM0_BASE, MCPWM_ACTION_QUALIFIER_1B, MCPWM_AQ_LOAD_FREEZE);
     MCPWM_setActionQualifierShadowLoadMode(myMCPWM0_BASE, MCPWM_ACTION_QUALIFIER_2A, MCPWM_AQ_LOAD_FREEZE);
     MCPWM_setActionQualifierShadowLoadMode(myMCPWM0_BASE, MCPWM_ACTION_QUALIFIER_2B, MCPWM_AQ_LOAD_FREEZE);
     MCPWM_setActionQualifierShadowLoadMode(myMCPWM0_BASE, MCPWM_ACTION_QUALIFIER_3A, MCPWM_AQ_LOAD_FREEZE);
     MCPWM_setActionQualifierShadowLoadMode(myMCPWM0_BASE, MCPWM_ACTION_QUALIFIER_3B, MCPWM_AQ_LOAD_FREEZE);
-
     MCPWM_setRisingEdgeDelayCountShadowLoadMode(myMCPWM0_BASE, MCPWM_RED_LOAD_FREEZE);
     MCPWM_setFallingEdgeDelayCountShadowLoadMode(myMCPWM0_BASE, MCPWM_FED_LOAD_FREEZE);
-
     // Time Base Configuration
     // -----------------------
     // Frequency        : 10000 Hz
@@ -520,18 +452,13 @@ void initMyMCPWM0(){
     // Sync Out Source  : Generated by software
     // Emulation Mode   : Stop after next Time Base counter increment or decrement
     //
-
     MCPWM_setEmulationMode(myMCPWM0_BASE, MCPWM_EMULATION_FREE_RUN);
-
     // MCPWM_setClockPrescaler(myMCPWM0_BASE, MCPWM_CLOCK_DIVIDER_1);
     MCPWM_setTimeBaseCounterMode(myMCPWM0_BASE, MCPWM_COUNTER_MODE_UP);
     MCPWM_setTimeBasePeriodActive(myMCPWM0_BASE, 15999);
-    
     // MCPWM_setSyncInPulseSource(myMCPWM0_BASE, MCPWM_SYNC_IN_PULSE_SRC_DISABLE);
     // MCPWM_setSyncOutPulseMode(myMCPWM0_BASE, MCPWM_SYNC_OUT_PULSE_ON_SOFTWARE);
     // MCPWM_setSyncPulseSource(myMCPWM0_BASE, MCPWM_SYNC_PULSE_DISABLED);
-
-
     //
     // Counter Compare Values
     // ----------------------
@@ -539,7 +466,6 @@ void initMyMCPWM0(){
     // PWM CMP C,D               :  0 % of TB Period Value
     //
     //
-
     MCPWM_setCounterCompareActiveValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_1A, 7999);
     MCPWM_setCounterCompareActiveValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_1B, 7999);
     MCPWM_setCounterCompareActiveValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_2A, 7999);
@@ -548,7 +474,6 @@ void initMyMCPWM0(){
     MCPWM_setCounterCompareActiveValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_3B, 7999);
     MCPWM_setCounterCompareActiveValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_C, 0);
     MCPWM_setCounterCompareActiveValue(myMCPWM0_BASE, MCPWM_COUNTER_COMPARE_D, 0);
-
     //
     // Action Qualifier Configurations
     // -------------------------------
@@ -571,7 +496,6 @@ void initMyMCPWM0(){
     //  - TB counter up equals CMPA    : Set output pins to low
     //  - TB counter up equals CMPB    : Set output pins to High
     // 
-    
     // PWM Output 1A
     MCPWM_setActionQualifierActionCompleteActive(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_1A,
                                            MCPWM_AQ_OUTPUT_HIGH_ZERO |
@@ -580,7 +504,6 @@ void initMyMCPWM0(){
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPA |
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_UP_CMPB |
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPB);
-
     // PWM Output 1B
     MCPWM_setActionQualifierActionCompleteActive(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_1B,
                                            MCPWM_AQ_OUTPUT_HIGH_ZERO |
@@ -589,7 +512,6 @@ void initMyMCPWM0(){
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPA |
                                            MCPWM_AQ_OUTPUT_LOW_UP_CMPB |
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPB);
-
     // PWM Output 2A
     MCPWM_setActionQualifierActionCompleteActive(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_2A,
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_ZERO |
@@ -598,7 +520,6 @@ void initMyMCPWM0(){
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPA |
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_UP_CMPB |
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPB);
-
     // PWM Output 2B
     MCPWM_setActionQualifierActionCompleteActive(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_2B,
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_ZERO |
@@ -607,7 +528,6 @@ void initMyMCPWM0(){
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPA |
                                            MCPWM_AQ_OUTPUT_HIGH_UP_CMPB |
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPB);
-
     // PWM Output 3A
     MCPWM_setActionQualifierActionCompleteActive(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_3A,
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_ZERO |
@@ -616,7 +536,6 @@ void initMyMCPWM0(){
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPA |
                                            MCPWM_AQ_OUTPUT_LOW_UP_CMPB |
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPB);
-
     // PWM Output 3B
     MCPWM_setActionQualifierActionCompleteActive(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_3B,
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_ZERO |
@@ -625,23 +544,19 @@ void initMyMCPWM0(){
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPA |
                                            MCPWM_AQ_OUTPUT_HIGH_UP_CMPB |
                                            MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPB);
-
     // MCPWM_setActionQualifierSWAction(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_1A, MCPWM_AQ_SW_FORCE_DISABLED);
     // MCPWM_setActionQualifierSWAction(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_1B, MCPWM_AQ_SW_FORCE_DISABLED);
     // MCPWM_setActionQualifierSWAction(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_2A, MCPWM_AQ_SW_FORCE_DISABLED);
     // MCPWM_setActionQualifierSWAction(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_2B, MCPWM_AQ_SW_FORCE_DISABLED);
     // MCPWM_setActionQualifierSWAction(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_3A, MCPWM_AQ_SW_FORCE_DISABLED);
     // MCPWM_setActionQualifierSWAction(myMCPWM0_BASE, MCPWM_AQ_OUTPUT_3B, MCPWM_AQ_SW_FORCE_DISABLED);
-
     //
     // Dead Band configurations
     // ------------------------
     // Disabled
     // 
-
     // MCPWM_setDeadBandDelayMode(myMCPWM0_BASE, MCPWM_DB_RED, false);
     // MCPWM_setDeadBandDelayMode(myMCPWM0_BASE, MCPWM_DB_FED, false);
-
     //
     // Trip Zone Configurations
     // ------------------------
@@ -651,11 +566,9 @@ void initMyMCPWM0(){
     // TZ Action on A     :   Disable action
     // TZ Action on B     :   Disable action
     // 
-
     // MCPWM_selectTripZoneCBCEvent(myMCPWM0_BASE, MCPWM_TZ_CBC_PULSE_CLR_NONE);
     // MCPWM_setTripZoneAction(myMCPWM0_BASE, MCPWM_TZ_ACTION_EVENT_TZA, MCPWM_TZ_ACTION_DISABLE);
     // MCPWM_setTripZoneAction(myMCPWM0_BASE, MCPWM_TZ_ACTION_EVENT_TZB, MCPWM_TZ_ACTION_DISABLE);
-
     //
     // Events and Interrupts
     // ---------------------
@@ -669,7 +582,6 @@ void initMyMCPWM0(){
     // 
     // Interrupt Sources   :    "Interrupt Event Trigger 1 signal"
     // 
-    
     // MCPWM_setADCTriggerSource(myMCPWM0_BASE, MCPWM_SOC_A, MCPWM_SOC_DISABLED);
     // MCPWM_setADCTriggerSource(myMCPWM0_BASE, MCPWM_SOC_B, MCPWM_SOC_DISABLED);
     // MCPWM_setADCTriggerSource(myMCPWM0_BASE, MCPWM_SOC_C, MCPWM_SOC_DISABLED);
@@ -677,16 +589,13 @@ void initMyMCPWM0(){
     MCPWM_setEventTriggerSource(myMCPWM0_BASE, MCPWM_ET_1, MCPWM_EVT_TBCTR_PERIOD);
     MCPWM_setEventTriggerEventPrescale(myMCPWM0_BASE, MCPWM_ET_1, 5);
     // MCPWM_setEventTriggerSource(myMCPWM0_BASE, MCPWM_ET_2, MCPWM_EVT_DISABLED);
-
     MCPWM_disableInterrupt(myMCPWM0_BASE, MCPWM_INT_SOURCE_ALL);
     MCPWM_enableInterrupt(myMCPWM0_BASE, MCPWM_INT_ET_1);
 }
-
 //
 // App fucntion initMyMCPWM1 - to initialize the myMCPWM1
 //
 void initMyMCPWM1(){
-
     //
     // Load Mode configurations
     // 
@@ -719,20 +628,14 @@ void initMyMCPWM1(){
     // Dead Band FED Load Mode : Freeze shadow to active load
     // 
     // 
-
     MCPWM_disableGlobalLoad(myMCPWM1_BASE);
-
     MCPWM_setPeriodLoadMode(myMCPWM1_BASE, MCPWM_PERIOD_SHADOW_LOAD_DISABLE);
-
     MCPWM_setCounterCompareShadowLoadMode(myMCPWM1_BASE, MCPWM_COUNTER_COMPARE_1A, MCPWM_COMP_LOAD_FREEZE);
     MCPWM_setCounterCompareShadowLoadMode(myMCPWM1_BASE, MCPWM_COUNTER_COMPARE_1B, MCPWM_COMP_LOAD_FREEZE);
-
     MCPWM_setActionQualifierShadowLoadMode(myMCPWM1_BASE, MCPWM_ACTION_QUALIFIER_1A, MCPWM_AQ_LOAD_FREEZE);
     MCPWM_setActionQualifierShadowLoadMode(myMCPWM1_BASE, MCPWM_ACTION_QUALIFIER_1B, MCPWM_AQ_LOAD_FREEZE);
-
     MCPWM_setRisingEdgeDelayCountShadowLoadMode(myMCPWM1_BASE, MCPWM_RED_LOAD_FREEZE);
     MCPWM_setFallingEdgeDelayCountShadowLoadMode(myMCPWM1_BASE, MCPWM_FED_LOAD_FREEZE);
-
     //
     // Time Base Configurations
     // ------------------------ 
@@ -748,18 +651,13 @@ void initMyMCPWM1(){
     // 
     // Emulation Mode   : Stop after next Time Base counter increment or decrement
     // 
-
     // MCPWM_setEmulationMode(myMCPWM1_BASE, MCPWM_EMULATION_STOP_AFTER_NEXT_TB);
-
     // MCPWM_setClockPrescaler(myMCPWM1_BASE, MCPWM_CLOCK_DIVIDER_1);
     MCPWM_setTimeBaseCounterMode(myMCPWM1_BASE, MCPWM_COUNTER_MODE_UP_DOWN);
     MCPWM_setTimeBasePeriodActive(myMCPWM1_BASE, 8000);
-    
     // MCPWM_setSyncInPulseSource(myMCPWM1_BASE, MCPWM_SYNC_IN_PULSE_SRC_DISABLE);
     // MCPWM_setSyncOutPulseMode(myMCPWM1_BASE, MCPWM_SYNC_OUT_PULSE_ON_SOFTWARE);
     // MCPWM_setSyncPulseSource(myMCPWM1_BASE, MCPWM_SYNC_PULSE_DISABLED);
-
-
     //
     // Counter Compare Values
     // ----------------------
@@ -769,12 +667,10 @@ void initMyMCPWM1(){
     // CMP D : 4000 or  50 % of TB Period Value
     // 
     // 
-
     MCPWM_setCounterCompareActiveValue(myMCPWM1_BASE, MCPWM_COUNTER_COMPARE_1A, 0);
     MCPWM_setCounterCompareActiveValue(myMCPWM1_BASE, MCPWM_COUNTER_COMPARE_1B, 0);
     MCPWM_setCounterCompareActiveValue(myMCPWM1_BASE, MCPWM_COUNTER_COMPARE_C, 4000);
     MCPWM_setCounterCompareActiveValue(myMCPWM1_BASE, MCPWM_COUNTER_COMPARE_D, 4000);
-
     //
     // Action Qualifier Configurations
     // -------------------------------
@@ -797,7 +693,6 @@ void initMyMCPWM1(){
         MCPWM_AQ_OUTPUT_NO_CHANGE_UP_CMPB |
         MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPB
     );
-
     // PWM Output B
     MCPWM_setActionQualifierActionCompleteActive(
         myMCPWM1_BASE,
@@ -809,10 +704,8 @@ void initMyMCPWM1(){
         MCPWM_AQ_OUTPUT_HIGH_UP_CMPB |
         MCPWM_AQ_OUTPUT_LOW_DOWN_CMPB
     );
-    
     // MCPWM_setActionQualifierSWAction(myMCPWM1_BASE, MCPWM_AQ_OUTPUT_1A, MCPWM_AQ_SW_FORCE_DISABLED);
     // MCPWM_setActionQualifierSWAction(myMCPWM1_BASE, MCPWM_AQ_OUTPUT_1B, MCPWM_AQ_SW_FORCE_DISABLED);
-
     //
     // Dead Band configurations
     // ------------------------
@@ -823,10 +716,8 @@ void initMyMCPWM1(){
     // Swap Output B           : Not Swapped
     // 
     // 
-
     // MCPWM_setDeadBandDelayMode(myMCPWM1_BASE, MCPWM_DB_RED, false);
     // MCPWM_setDeadBandDelayMode(myMCPWM1_BASE, MCPWM_DB_FED, false);
-
     //
     // Trip Zone Configurations
     // ------------------------
@@ -836,11 +727,9 @@ void initMyMCPWM1(){
     // TZ Action on A     :   Disable action
     // TZ Action on B     :   Disable action
     // 
-
     // MCPWM_selectTripZoneCBCEvent(myMCPWM1_BASE, MCPWM_TZ_CBC_PULSE_CLR_NONE);
     // MCPWM_setTripZoneAction(myMCPWM1_BASE, MCPWM_TZ_ACTION_EVENT_TZA, MCPWM_TZ_ACTION_DISABLE);
     // MCPWM_setTripZoneAction(myMCPWM1_BASE, MCPWM_TZ_ACTION_EVENT_TZB, MCPWM_TZ_ACTION_DISABLE);
-
     //
     // Events and Interrupts
     // ---------------------
@@ -854,7 +743,6 @@ void initMyMCPWM1(){
     // 
     // Interrupt Sources   :    "Interrupt Event Trigger 1 signal"
     // 
-    
     // MCPWM_setADCTriggerSource(myMCPWM1_BASE, MCPWM_SOC_A, MCPWM_SOC_DISABLED);
     // MCPWM_setADCTriggerSource(myMCPWM1_BASE, MCPWM_SOC_B, MCPWM_SOC_DISABLED);
     // MCPWM_setADCTriggerSource(myMCPWM1_BASE, MCPWM_SOC_C, MCPWM_SOC_DISABLED);
@@ -862,8 +750,6 @@ void initMyMCPWM1(){
     MCPWM_setEventTriggerSource(myMCPWM1_BASE, MCPWM_ET_1, MCPWM_EVT_TBCTR_PERIOD);
     MCPWM_setEventTriggerEventPrescale(myMCPWM1_BASE, MCPWM_ET_1, 5);
     // MCPWM_setEventTriggerSource(myMCPWM1_BASE, MCPWM_ET_2, MCPWM_EVT_DISABLED);
-
     MCPWM_disableInterrupt(myMCPWM1_BASE, MCPWM_INT_SOURCE_ALL);
     MCPWM_enableInterrupt(myMCPWM1_BASE, MCPWM_INT_ET_1);
 }
-

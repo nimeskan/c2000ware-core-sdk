@@ -184,7 +184,6 @@ function fsiLoggerHideChange(){
     fsiLoggerGrid.hidden = fsiLoggerHide.checked;
 }
 
-
 //
 // The global FSI logger variable holding the received data
 //
@@ -269,7 +268,6 @@ let rtLoggerFilterText;
 let rtLoggerHide;
 let rtLoggerExportMode;
 
-
 function rtLoggerFilterSort(){
     rtLoggerGrid.sortByColumn = rtLoggerSortByColumn.selectedValue;
     rtLoggerGrid.sortDescending = rtLoggerSortDescending.checked;
@@ -329,7 +327,6 @@ var rtLoggerDataProvider = {
 var rtLoggerGrid;
 var rtLoggerIndex = 0;
 var rtLoggerIndexStatusBar = "0";
-
 
 //
 // FSI Logger scroll hanlder
@@ -471,7 +468,6 @@ function jsonToCsv(jsonData, withHeader) {
   }
 }
 
-
 //
 // Pivots the provided JSON data to create a flat array where the unique
 // log_var_name values become the new column headers.
@@ -503,8 +499,6 @@ function rtLogPivotAndConvertToCsv(jsonData){
 
   return jsonToCsv(pivotedData, true);
 };
-
-
 
 % if (gui.dltlogger) {
 /**
@@ -1119,7 +1113,6 @@ const init = () => {
     });
     GcWidget.querySelector('#rt_logger_export').then((but) => {
         but.addEventListener('click', () => {
-            // console.log(JSON.stringify(fsiLoggerGridData, null, 4));
             if (rtLoggerExportMode.selectedValue == "json"){
                 GcFiles.writeTextFile("rtLog.json", JSON.stringify(rtLoggerGridData, null, 4));
                 statusbar.statusText = "rtLog.json saved!"
@@ -1133,9 +1126,7 @@ const init = () => {
                 document.querySelector('#rt_logger_exp_div').innerHTML = csvData;
                 document.querySelector('#rt_logger_exp_dialog').open();
             }
-            
         });
-
     })
 
     GcWidget.querySelector('#rt_logger_sort_descending').then((chb) => {
@@ -1158,7 +1149,6 @@ const init = () => {
         rtLoggerExportMode = sel;
     });
     
-
 %}
 
 % if (gui.customlogger) {
@@ -1257,6 +1247,9 @@ const init = () => {
     });
     GcWidget.querySelector('#usb_led').then((led) => {
         usbLed = led 
+    });
+    GcWidget.querySelector('#rt_logger_index_status_bar').then((stblbl) => {
+        rtLoggerIndexStatusBar = stblbl; 
     });
 
     GcWidget.querySelector('#rt_logger_index_status_bar').then((stblbl) => {

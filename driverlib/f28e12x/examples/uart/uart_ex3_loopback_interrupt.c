@@ -70,7 +70,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //#############################################################################
-
 //
 // Included Files
 //
@@ -78,7 +77,6 @@
 #include "device.h"
 #include "board.h"
 #include "c2000ware_libraries.h"
-
 //
 // Define to enable external UART loopback configuration
 //
@@ -87,48 +85,39 @@
 //      external connections required
 //
 #define EXTERNAL_LOOPBACK_ENABLE    0
-
 //
 // Defines
 //
 uint16_t sData[2], rData[2];
 uint16_t errorCount, loopCount;
-
 void error(void);
-
 //
 // Main
 //
 void main(void)
 {
     uint16_t i;
-
     //
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pull-ups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // PinMux and Peripheral Initialization
     //
     Board_init();
-
     #if EXTERNAL_LOOPBACK_ENABLE == 1
         //
         // External loopback configuration
@@ -140,18 +129,15 @@ void main(void)
         //
         UART_enableLoopback(myUART0_BASE);
     #endif
-
     //
     // C2000Ware Library initialization
     //
     C2000Ware_libraries_init();
-
     //
     // Enable Global Interrupt (INTM) and real time interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     //
     // Init the send data.  After each transmission this data
     // will be updated for the next transmission.
@@ -162,7 +148,6 @@ void main(void)
         sData[i] = i;
         UART_writeChar(myUART0_BASE, sData[i]);
     }
-
     while(1)
     {
         //
@@ -172,22 +157,18 @@ void main(void)
         //
     }
 }
-
 __interrupt void UART_RX_IntHandler(void)
 {
     uint32_t ui32Status;
     uint16_t i = 0;
-
     //
     // Get the interrupt status.
     //
     ui32Status = UART_getInterruptStatus(myUART0_BASE, UART_RAW_INT);
-
     //
     // Clear the asserted interrupts.
     //
     UART_clearInterruptStatus(myUART0_BASE, ui32Status);
-
     //
     // Loop while there are characters in the receive FIFO.
     //
@@ -198,7 +179,6 @@ __interrupt void UART_RX_IntHandler(void)
         //
         rData[i++] = UART_readCharNonBlocking(myUART0_BASE);
     }
-
     //
     // Check received data
     //
@@ -211,7 +191,6 @@ __interrupt void UART_RX_IntHandler(void)
             //error();
         }
     }
-
     //
     // Increment & send data for next cycle
     //
@@ -220,14 +199,11 @@ __interrupt void UART_RX_IntHandler(void)
         sData[i] = (sData[i] + 1) & 0x00FF;
         UART_writeCharNonBlocking(myUART0_BASE, sData[i]);
     }
-
     loopCount++;
-
     // Clear UART and PIPE interrupts
     UART_clearGlobalInterruptFlag(myUART0_BASE);
     Interrupt_clearACKGroup(INT_myUART0_INTERRUPT_ACK_GROUP);
 }
-
 //
 // error - Function to halt debugger on error
 //
@@ -236,7 +212,6 @@ void error(void)
     asm("     ESTOP0"); // Test failed!! Stop!
     for (;;);
 }
-
 //
 // End of File
 //

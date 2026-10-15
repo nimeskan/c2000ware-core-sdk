@@ -73,18 +73,15 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //#############################################################################
-
 //
 // Included Files
 //
 #include "f28x_project.h"
-
 //
 // Function Prototypes
 //
 void initMyMCPWM0(void);
 void initMyMCPWM1(void);
-
 void main(void)
 {
     //
@@ -93,7 +90,6 @@ void main(void)
     // This example function is found in the f2838x_sysctrl.c file.
     //
     InitSysCtrl();
-
     //
     // For this case just init GPIO pins for mcpwm1, mcpwm3
     // These functions are in the f2838x_mcpwm.c file
@@ -101,13 +97,11 @@ void main(void)
     InitGpio();
     InitMcpwm1Gpio();
     InitMcpwm3Gpio();
-
     //
     // Step 3. Clear all interrupts and initialize PIE vector table:
     // Disable CPU interrupts
     //
     DINT;
-
     //
     // Initialize the PIE control registers to their default state.
     // The default state is all PIE interrupts disabled and flags
@@ -115,41 +109,34 @@ void main(void)
     // This function is found in the f2838x_piectrl.c file.
     //
     InitPieCtrl();
-
     //
     // Disable CPU interrupts and clear all CPU interrupt flags:
     //
     IER = 0x0000;
     IFR = 0x0000;
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     InitPieVectTable();
-
     //
     // Disable sync(Freeze clock to PWM as well)
     //
     CpuSysRegs.PERCLKCR.bit.TBCLKSYNC = 0;
-
     //
     // Initialize MCPWM modules
     //
     initMyMCPWM0();
     initMyMCPWM1();
-
     //
     // Enable global interrupts and real-time debug
     //
     EINT;
     ERTM;
-
     //
     // Enable sync clock
     //
     CpuSysRegs.PERCLKCR.bit.TBCLKSYNC = 1;
-
     //
     // IDLE loop
     //
@@ -158,7 +145,6 @@ void main(void)
         asm ("  NOP");
     }
 }
-
 //
 // initMyMCPWM0 - Initialize MCPWM1 module for deadband example
 //
@@ -170,46 +156,38 @@ void initMyMCPWM0(void)
     Pwm1Regs.TBCTL.bit.CTRMODE = TB_COUNT_UPDOWN;   // Up-down count mode
     Pwm1Regs.TBCTL.bit.CLKDIV = TB_DIV1;           // TBCLK = SYSCLKOUT / 1
     Pwm1Regs.TBCTL.bit.FREE_SOFT = EMULATION_FREE_RUN; // Free run in emulation
-
     //
     // Set Period for 20kHz switching frequency (TBCLK = 160MHz)
     // Period = 160MHz/(2*20kHz) = 4000 counts for Up-Down count mode
     //
     Pwm1Regs.TBPRDS.bit.TBPRDS = 4000;             // Set timer period
-
     //
     // Set Compare values for all channels (50% duty cycle)
     //
     Pwm1Regs.PWM1_CMPAS.bit.PWM1_CMPAS = 2000;    // Set compare A value
     Pwm1Regs.PWM2_CMPAS.bit.PWM2_CMPAS = 2000;    // Set compare A value
     Pwm1Regs.PWM3_CMPAS.bit.PWM3_CMPAS = 2000;    // Set compare A value
-
     //
     // Setup Action Qualifier for all channels
     //
     Pwm1Regs.PWM1_AQCTLAS.bit.CAU = AQ_SET;       // Set high on CMPA up
     Pwm1Regs.PWM1_AQCTLAS.bit.CAD = AQ_CLEAR;     // Set low on CMPA down
-
     Pwm1Regs.PWM2_AQCTLAS.bit.CAU = AQ_SET;       // Set high on CMPA up
     Pwm1Regs.PWM2_AQCTLAS.bit.CAD = AQ_CLEAR;     // Set low on CMPA down
-
     Pwm1Regs.PWM3_AQCTLAS.bit.CAU = AQ_SET;       // Set high on CMPA up
     Pwm1Regs.PWM3_AQCTLAS.bit.CAD = AQ_CLEAR;     // Set low on CMPA down
-
     //
     // Dead-Band Configuration
     //
     Pwm1Regs.DBCTL.bit.OUT_MODE = DB_FULL_ENABLE;   // Enable Dead-band module
     Pwm1Regs.DBCTL.bit.POLSEL = DB_ACTV_HI;         // Active high
     Pwm1Regs.DBCTL.bit.IN_MODE = DBA_ALL;           // Use PWMxA as source
-
     //
     // Set Dead-Band Delays
     //
     Pwm1Regs.DBREDS.bit.DBREDS = 100;              // Rising edge delay
     Pwm1Regs.DBFEDS.bit.DBFEDS = 100;              // Falling edge delay
 }
-
 //
 // initMyMCPWM1 - Initialize MCPWM3 module for deadband example
 //
@@ -221,24 +199,20 @@ void initMyMCPWM1(void)
     Pwm3Regs.TBCTL.bit.CTRMODE = TB_COUNT_UPDOWN;   // Up-down count mode
     Pwm3Regs.TBCTL.bit.CLKDIV = TB_DIV1;           // TBCLK = SYSCLKOUT / 1
     Pwm3Regs.TBCTL.bit.FREE_SOFT = EMULATION_FREE_RUN; // Free run in emulation
-
     //
     // Set Period for 20kHz switching frequency
     // Period = 160MHz/(2*20kHz) = 4000 counts for Up-Down count mode
     //
     Pwm3Regs.TBPRDS.bit.TBPRDS = 4000;             // Set timer period
-
     //
     // Set Compare values for PWM1 (50% duty cycle)
     //
     Pwm3Regs.PWM1_CMPAS.bit.PWM1_CMPAS = 2000;    // Set compare A value
-
     //
     // Setup Action Qualifier for PWM1
     //
     Pwm3Regs.PWM1_AQCTLAS.bit.CAU = AQ_SET;       // Set high on CMPA up
     Pwm3Regs.PWM1_AQCTLAS.bit.CAD = AQ_CLEAR;     // Set low on CMPA down
-
     //
     // Disable Dead-Band for MCPWM1
     //

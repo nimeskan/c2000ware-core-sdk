@@ -58,14 +58,12 @@
 // $
 //#############################################################################
 //
-
 //
 // Included Files
 //
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
 //
 // Globals
 //
@@ -74,30 +72,25 @@ uint32_t intStatus;
 // Functional Prototypes
 //
 void configureMCPWM(uint32_t mcpwmBase);
-
 void main(void)
 {
     //
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pullups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Board Initialization
     // - Configure the ADC and power it up
@@ -106,34 +99,28 @@ void main(void)
     //      SOC0 will generate an interrupt if conversion is above or below limits
     // 
     Board_init();
-
     //
     // Configure the MCPWM
     //
     configureMCPWM(PWM1_BASE);
-
     //
     // Enable global Interrupts and higher priority real-time debug events:
     //
     EINT;  // Enable Global interrupt INTM
     ERTM;  // Enable Global realtime interrupt DBGM
-
     //
     // Start MCPWM:
     // Enable sync and clock to PWM
     //
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Enable SOCA trigger
     //
     MCPWM_enableADCTrigger(PWM1_BASE, MCPWM_SOC_A);
-
     //
     // Unfreeze pwm counter to count-up
     //
     MCPWM_setTimeBaseCounterMode(PWM1_BASE, MCPWM_COUNTER_MODE_UP);
-
     //
     // Take conversions indefinitely in loop
     //
@@ -148,7 +135,6 @@ void main(void)
     }
     while(1);
 }
-
 //
 // configureMCPWM - Setup SOC and compare values for MCPWM
 //
@@ -162,38 +148,31 @@ void configureMCPWM(uint32_t mcpwmBase)
     //
     MCPWM_setPeriodLoadMode(PWM1_BASE, MCPWM_PERIOD_SHADOW_LOAD_DISABLE);
     MCPWM_setCounterCompareShadowLoadMode(PWM1_BASE, MCPWM_COUNTER_COMPARE_1A, MCPWM_COMP_LOAD_FREEZE);
-
     //
     // Disable SOCA trigger
     //
     MCPWM_disableADCTrigger(PWM1_BASE, MCPWM_SOC_A);
-
     //
     // Trigger SOCA on CMPA up-count
     //
     MCPWM_setADCTriggerSource(PWM1_BASE, MCPWM_SOC_A, MCPWM_SOC_TBCTR_U_CMP1A);
-
     //
     // Generate pulse on 1st event
     //
     MCPWM_setADCTriggerEventPrescale(PWM1_BASE, MCPWM_SOC_A, 1);
-
     //
     // Set compare A value to 2048 counts
     //
     MCPWM_setCounterCompareActiveValue(PWM1_BASE, MCPWM_COUNTER_COMPARE_1A, 2048U);
-
     //
     // Set period to 4096 counts
     //
     MCPWM_setTimeBasePeriodActive(PWM1_BASE, 4096U);
-
     //
     // Freeze counter
     //
     MCPWM_setTimeBaseCounterMode(PWM1_BASE, MCPWM_COUNTER_MODE_STOP_FREEZE);
 }
-
 //
 // adcAEvtISR - ISR for ADCA PPB
 //
@@ -209,7 +188,6 @@ interrupt void adcAEvtISR(void)
         // Voltage exceeded high limit
         //
         asm("   ESTOP0");
-
         //
         // Clear the trip flag and continue
         //
@@ -221,7 +199,6 @@ interrupt void adcAEvtISR(void)
         // Voltage exceeded low limit
         //
         asm("   ESTOP0");
-
         //
         // Clear the trip flag and continue
         //
@@ -229,7 +206,6 @@ interrupt void adcAEvtISR(void)
     }
     Interrupt_clearACKGroup(INT_myADC0_EVT_INTERRUPT_ACK_GROUP);
 }
-
 //
 // End of file
 //

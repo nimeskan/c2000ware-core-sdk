@@ -57,17 +57,14 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //#############################################################################
-
 //
 // Included Files
 //
 #include "device.h"
-
 //
 // Function Prototypes
 //
 void setup1GPIO(void);
-
 //
 // Main
 //
@@ -77,26 +74,21 @@ void main(void)
     // Initializes system control, device clock, and peripherals
     //
     Device_init();
-
     //
     // Initializes PIE and clear PIE registers. Disables CPU interrupts.
     // and clear all CPU interrupt flags.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // This example is a basic pinout
     //
     setup1GPIO();
-
 }
-
 //
 // setup1GPIO - Is an example that demonstrates the basic pinout
 //
@@ -111,7 +103,6 @@ setup1GPIO(void)
     // These can be combined into single statements for improved
     // code efficiency.
     //
-
     //
     // Enable MCPWM1-3 on GPIO0-GPIO5
     //
@@ -127,7 +118,6 @@ setup1GPIO(void)
     GPIO_setPinConfig(GPIO_3_MCPWM1_2B);              // GPIO3 = MCPWM2B
     GPIO_setPinConfig(GPIO_4_MCPWM1_3A);              // GPIO4 = MCPWM3A
     GPIO_setPinConfig(GPIO_5_MCPWM1_3B);              // GPIO5 = MCPWM3B
-
     //
     // Enable EQEP1 on GPIO's 6,7,12,133
     //
@@ -143,14 +133,12 @@ setup1GPIO(void)
     GPIO_setPinConfig(GPIO_7_EQEP1_B);             // GPIO7 = EQEP1B
     GPIO_setPinConfig(GPIO_12_EQEP1_STROBE);        // GPIO12 = EQEP1S
     GPIO_setPinConfig(GPIO_13_EQEP1_INDEX);         // GPIO13 = EQEP1I
-
     //
     // Enable eCAP1 on GPIO7
     //
     GPIO_setPadConfig(7, GPIO_PIN_TYPE_PULLUP);         // Enable pullup on GPIO7
     GPIO_setQualificationMode(7, GPIO_QUAL_SYNC);       // Synch to SYSCLKOUT
     XBAR_setInputPin(INPUTXBAR_BASE, XBAR_INPUT7, 7);   // GPIO7 = ECAP1
-
     //
     // Enable Trip Zone inputs on GPIO12 - GPIO13
     //
@@ -160,7 +148,6 @@ setup1GPIO(void)
     GPIO_setQualificationMode(13, GPIO_QUAL_ASYNC);     // asynch input
     XBAR_setInputPin(INPUTXBAR_BASE, XBAR_INPUT1, 12); // GPIO12 = TZ1
     XBAR_setInputPin(INPUTXBAR_BASE, XBAR_INPUT2, 13); // GPIO13 = TZ2
-
     //
     // Enable SPI-A
     //
@@ -176,8 +163,6 @@ setup1GPIO(void)
     GPIO_setPinConfig(GPIO_13_SPIA_POCI);            // GPIO13 = SPIPOCIA
     GPIO_setPinConfig(GPIO_12_SPIA_CLK);             // GPIO12 = SPICLKA
     GPIO_setPinConfig(GPIO_29_SPIA_PTE);             // GPIO29 = SPIPTEA
-
-
     //
     // Make GPIO29 wakeup from STANDBY Low Power Modes
     //
@@ -187,7 +172,6 @@ setup1GPIO(void)
     SysCtl_setStandbyQualificationPeriod(2);     // Qualify GPIO29 by 2 OSCCLK
                                                  // cycles before waking
                                                  // the device from STANDBY
-
     //
     // Enable SCI-A on GPIO35 - GPIO37
     //
@@ -196,7 +180,6 @@ setup1GPIO(void)
     GPIO_setPinConfig(GPIO_35_SCIA_RX);              // GPIO35 = SCIRXDA
     GPIO_setPadConfig(37, GPIO_PIN_TYPE_PULLUP);     // Enable pullup on GPIO37
     GPIO_setPinConfig(GPIO_37_SCIA_TX);              // GPIO37 = SCITXDA
-
     //
     // Enable I2C-A on GPIO19 - GPIO18
     //
@@ -206,10 +189,7 @@ setup1GPIO(void)
     GPIO_setPadConfig(18, GPIO_PIN_TYPE_PULLUP);     // Enable pullup on GPIO18
     GPIO_setQualificationMode(18, GPIO_QUAL_ASYNC);  // asynch input
     GPIO_setPinConfig(GPIO_18_I2CA_SCL);             // GPIO18 = SCLA
-
 }
-
 //
 // End of File
 //
-

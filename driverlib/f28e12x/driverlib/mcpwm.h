@@ -1218,14 +1218,14 @@ MCPWM_setPeriodLoadMode(uint32_t base, MCPWM_PeriodLoadMode loadMode)
         //
         // Clear PRDLD
         //
-        HWREG(base + MCPWM_O_TBCTL) &= ~MCPWM_TBCTL_PRDLD;
+        HWREG(base + MCPWM_O_TBCTL) &= ~((uint32_t)MCPWM_TBCTL_PRDLD);
     }
     else
     {
         //
         // Set PRDLD
         //
-        HWREG(base + MCPWM_O_TBCTL) |= MCPWM_TBCTL_PRDLD;
+        HWREG(base + MCPWM_O_TBCTL) |= (uint32_t)MCPWM_TBCTL_PRDLD;
     }
 }
 
@@ -1252,7 +1252,7 @@ MCPWM_enablePhaseShiftLoad(uint32_t base)
     //
     // Set PHSEN bit
     //
-    HWREG(base + MCPWM_O_TBCTL) |= MCPWM_TBCTL_PHSEN;
+    HWREG(base + MCPWM_O_TBCTL) |= (uint32_t)MCPWM_TBCTL_PHSEN;
 }
 
 //*****************************************************************************
@@ -1310,14 +1310,14 @@ MCPWM_setCountModeAfterSync(uint32_t base, MCPWM_SyncCountMode mode)
         //
         // Set PHSDIR bit
         //
-        HWREG(base + MCPWM_O_TBCTL) |= MCPWM_TBCTL_PHSDIR;
+        HWREG(base + MCPWM_O_TBCTL) |= (uint32_t)MCPWM_TBCTL_PHSDIR;
     }
     else
     {
         //
         // Clear PHSDIR bit
         //
-        HWREG(base + MCPWM_O_TBCTL) &= ~MCPWM_TBCTL_PHSDIR;
+        HWREG(base + MCPWM_O_TBCTL) &= ~((uint32_t)MCPWM_TBCTL_PHSDIR);
     }
 }
 
@@ -1343,7 +1343,7 @@ MCPWM_forceSyncPulse(uint32_t base)
     //
     // Set SWFSYNC bit
     //
-    HWREG(base + MCPWM_O_TBCTL) |= MCPWM_TBCTL_SWSYNC;
+    HWREG(base + MCPWM_O_TBCTL) |= (uint32_t)MCPWM_TBCTL_SWSYNC;
 }
 
 //*****************************************************************************
@@ -2659,7 +2659,7 @@ MCPWM_enableGlobalLoad(uint32_t base)
     // Shadow to active load is controlled globally
     //
     EALLOW;
-    HWREG(base + MCPWM_O_GLDCTL) |= MCPWM_GLDCTL_GLD;
+    HWREG(base + MCPWM_O_GLDCTL) |= (uint32_t)MCPWM_GLDCTL_GLD;
     EDIS;
 }
 
@@ -2687,7 +2687,7 @@ MCPWM_disableGlobalLoad(uint32_t base)
     // Shadow to active load is controlled individually
     //
     EALLOW;
-    HWREG(base + MCPWM_O_GLDCTL) &= ~MCPWM_GLDCTL_GLD;
+    HWREG(base + MCPWM_O_GLDCTL) &= ~((uint32_t)MCPWM_GLDCTL_GLD);
     EDIS;
 }
 
@@ -2734,7 +2734,7 @@ MCPWM_setGlobalLoadTrigger(uint32_t base, MCPWM_GlobalLoadTrigger loadTrigger)
     //
     EALLOW;
     HWREG(base + MCPWM_O_GLDCTL) =
-               ((HWREG(base + MCPWM_O_GLDCTL) & ~MCPWM_GLDCTL_GLDMODE_M) |
+               ((HWREG(base + MCPWM_O_GLDCTL) & ~((uint32_t)MCPWM_GLDCTL_GLDMODE_M)) |
                 ((uint32_t)loadTrigger << MCPWM_GLDCTL_GLDMODE_S));
     EDIS;
 }
@@ -2764,7 +2764,7 @@ MCPWM_enableGlobalLoadOneShotMode(uint32_t base)
     // Enable global continuous shadow to active load
     //
     EALLOW;
-    HWREG(base + MCPWM_O_GLDCTL) |= MCPWM_GLDCTL_OSHTMODE;
+    HWREG(base + MCPWM_O_GLDCTL) |= (uint32_t)MCPWM_GLDCTL_OSHTMODE;
     EDIS;
 }
 
@@ -2793,7 +2793,7 @@ MCPWM_disableGlobalLoadOneShotMode(uint32_t base)
     // Enable global continuous shadow to active load
     //
     EALLOW;
-    HWREG(base + MCPWM_O_GLDCTL) &= ~MCPWM_GLDCTL_OSHTMODE;
+    HWREG(base + MCPWM_O_GLDCTL) &= ~((uint32_t)MCPWM_GLDCTL_OSHTMODE);
     EDIS;
 }
 
@@ -2822,7 +2822,7 @@ MCPWM_setGlobalLoadOneShotLatch(uint32_t base)
     // Set a one shot Global shadow load pulse.
     //
     EALLOW;
-    HWREG(base + MCPWM_O_GLDOSHTCTL) |= MCPWM_GLDOSHTCTL_OSHTLD;
+    HWREG(base + MCPWM_O_GLDOSHTCTL) |= (uint32_t)MCPWM_GLDOSHTCTL_OSHTLD;
     EDIS;
 }
 
@@ -2851,7 +2851,7 @@ MCPWM_clearGlobalLoadOneShotLatch(uint32_t base)
     // Set a one shot Global shadow load pulse.
     //
     EALLOW;
-    HWREG(base + MCPWM_O_GLDOSHTCTL) &= ~MCPWM_GLDOSHTCTL_OSHTLD;
+    HWREG(base + MCPWM_O_GLDOSHTCTL) &= ~((uint32_t)MCPWM_GLDOSHTCTL_OSHTLD);
     EDIS;
 }
 
@@ -3128,14 +3128,14 @@ MCPWM_setFallingEdgeDeadBandDelayInput(uint32_t base, uint16_t input)
         //
         // Set the Falling Edge Delay input
         //
-        HWREG(base + MCPWM_O_DBCTL) |= MCPWM_DBCTL_DEDB_MODE;
+        HWREG(base + MCPWM_O_DBCTL) |= (uint32_t)MCPWM_DBCTL_DEDB_MODE;
     }
     else
     {
         //
         // Set the Falling Edge Delay input
         //
-        HWREG(base + MCPWM_O_DBCTL) &= ~MCPWM_DBCTL_DEDB_MODE;
+        HWREG(base + MCPWM_O_DBCTL) &= ~((uint32_t)MCPWM_DBCTL_DEDB_MODE);
 
         //
         // Set the Rising Edge Delay input
@@ -3617,7 +3617,7 @@ MCPWM_clearTripZoneFlagStatus(uint32_t base, uint32_t tzFlags)
     // Check the arguments
     //
     ASSERT(MCPWM_isBaseValid(base));
-    ASSERT((tzFlags & ~MCPWM_TZ_FLAG_ALL) == 0U);
+    ASSERT((tzFlags & ~((uint32_t)MCPWM_TZ_FLAG_ALL)) == 0U);
 
     //
     // Clear the Cycle By Cycle Trip zone flag
@@ -3658,16 +3658,16 @@ MCPWM_enableADCTrigger(uint32_t base, MCPWM_ADCStartOfConversionType adcSOCType)
     switch (adcSOCType)
     {
     case MCPWM_SOC_A:
-        HWREG(base + MCPWM_O_SOCEN) |= MCPWM_SOCEN_SOCA_ENABLE;
+        HWREG(base + MCPWM_O_SOCEN) |= (uint32_t)MCPWM_SOCEN_SOCA_ENABLE;
         break;
     case MCPWM_SOC_B:
-        HWREG(base + MCPWM_O_SOCEN) |= MCPWM_SOCEN_SOCB_ENABLE;
+        HWREG(base + MCPWM_O_SOCEN) |= (uint32_t)MCPWM_SOCEN_SOCB_ENABLE;
         break;
     case MCPWM_SOC_C:
-        HWREG(base + MCPWM_O_SOCEN) |= MCPWM_SOCEN_SOCC_ENABLE;
+        HWREG(base + MCPWM_O_SOCEN) |= (uint32_t)MCPWM_SOCEN_SOCC_ENABLE;
         break;
     default:    // MCPWM_SOC_D
-        HWREG(base + MCPWM_O_SOCEN) |= MCPWM_SOCEN_SOCD_ENABLE;
+        HWREG(base + MCPWM_O_SOCEN) |= (uint32_t)MCPWM_SOCEN_SOCD_ENABLE;
         break;
     }
 }
@@ -3981,16 +3981,16 @@ MCPWM_clearADCTriggerFlag(uint32_t base,
    switch (adcSOCType)
     {
     case MCPWM_SOC_A:
-        HWREG(base + MCPWM_O_SOCCLR) |= MCPWM_SOCCLR_SOCA;
+        HWREG(base + MCPWM_O_SOCCLR) |= (uint32_t)MCPWM_SOCCLR_SOCA;
         break;
     case MCPWM_SOC_B:
-        HWREG(base + MCPWM_O_SOCCLR) |= MCPWM_SOCCLR_SOCB;
+        HWREG(base + MCPWM_O_SOCCLR) |= (uint32_t)MCPWM_SOCCLR_SOCB;
         break;
     case MCPWM_SOC_C:
-        HWREG(base + MCPWM_O_SOCCLR) |= MCPWM_SOCCLR_SOCC;
+        HWREG(base + MCPWM_O_SOCCLR) |= (uint32_t)MCPWM_SOCCLR_SOCC;
         break;
     default:    // MCPWM_SOC_D
-        HWREG(base + MCPWM_O_SOCCLR) |= MCPWM_SOCCLR_SOCD;
+        HWREG(base + MCPWM_O_SOCCLR) |= (uint32_t)MCPWM_SOCCLR_SOCD;
         break;
     }
 }
@@ -4180,7 +4180,7 @@ static inline void MCPWM_enableInterrupt(uint32_t base,
     // Set bits in ECEINT register
     //
     EALLOW;
-    HWREG(base + MCPWM_O_INTEN) |= intFlags;
+    HWREG(base + MCPWM_O_INTEN) |= (uint32_t)intFlags;
     EDIS;
 }
 
@@ -4214,7 +4214,7 @@ static inline void MCPWM_disableInterrupt(uint32_t base,
     // Clear bits in ECEINT register
     //
     EALLOW;
-    HWREG(base + MCPWM_O_INTEN) &= ~intFlags;
+    HWREG(base + MCPWM_O_INTEN) &= ~((uint32_t)intFlags);
     EDIS;
 }
 

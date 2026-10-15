@@ -54,31 +54,26 @@
 // $
 //#############################################################################
 //
-
 //
 // Included Files
 //
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
 //
 // Defines
 //
 #define RESULTS_BUFFER_SIZE     256
-
 //
 // Globals
 //
 uint16_t myADC0Results[RESULTS_BUFFER_SIZE];   // Buffer for results
 uint16_t index;                              // Index into result buffer
 volatile uint16_t bufferFull;                // Flag to indicate buffer is full
-
 //
 // Function Prototypes
 //
 void initMCPWM(void);
-
 //
 // Main
 //
@@ -88,33 +83,27 @@ void main(void)
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pullups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     // 
     // Board Initialization
     // - Set up the ADC and initialize the SOC
     // - Enable ADC interrupt
     //
     Board_init();
-
     // Set up the MCPWM
     initMCPWM();
-
     //
     // Initialize results buffer
     //
@@ -122,16 +111,13 @@ void main(void)
     {
         myADC0Results[index] = 0;
     }
-
     index = 0;
     bufferFull = 0;
-
     //
     // Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     //
     // Loop indefinitely
     //
@@ -142,7 +128,6 @@ void main(void)
         //
         MCPWM_enableADCTrigger(PWM1_BASE, MCPWM_SOC_A);
         MCPWM_setTimeBaseCounterMode(PWM1_BASE, MCPWM_COUNTER_MODE_UP);
-
         //
         // Wait while MCPWM1 causes ADC conversions which then cause interrupts.
         // When the results buffer is filled, the bufferFull flag will be set.
@@ -151,13 +136,11 @@ void main(void)
         {
         }
         bufferFull = 0;     // Clear the buffer full flag
-
         //
         // Stop MCPWM1, disabling SOCA and freezing the counter
         //
         MCPWM_disableADCTrigger(PWM1_BASE, MCPWM_SOC_A);
         MCPWM_setTimeBaseCounterMode(PWM1_BASE, MCPWM_COUNTER_MODE_STOP_FREEZE);
-
         //
         // Software breakpoint. At this point, conversion results are stored in
         // myADC0Results.
@@ -167,7 +150,6 @@ void main(void)
         ESTOP0;
     }
 }
-
 //
 // Function to configure MCPWM1 to generate the SOC.
 //
@@ -181,18 +163,15 @@ void initMCPWM(void)
     //
     MCPWM_setPeriodLoadMode(PWM1_BASE, MCPWM_PERIOD_SHADOW_LOAD_DISABLE);
     MCPWM_setCounterCompareShadowLoadMode(PWM1_BASE, MCPWM_COUNTER_COMPARE_1A, MCPWM_COMP_LOAD_FREEZE);
-
     //
     // Disable SOCA
     //
     MCPWM_disableADCTrigger(PWM1_BASE, MCPWM_SOC_A);
-
     //
     // Configure the SOC to occur on the first up-count event
     //
     MCPWM_setADCTriggerSource(PWM1_BASE, MCPWM_SOC_A, MCPWM_SOC_TBCTR_U_CMP1A);
     MCPWM_setADCTriggerEventPrescale(PWM1_BASE, MCPWM_SOC_A, 1);
-
     //
     // Set the compare A value to 1000 and the period to 1999
     // Assuming MCPWM clock is 100MHz, this would give 50kHz sampling
@@ -202,18 +181,15 @@ void initMCPWM(void)
     //
     MCPWM_setCounterCompareActiveValue(PWM1_BASE, MCPWM_COUNTER_COMPARE_1A, 1000);
     MCPWM_setTimeBasePeriodActive(PWM1_BASE, 1999);
-
     //
     // Set the local MCPWM module clock divider to /1
     //
     MCPWM_setClockPrescaler(PWM1_BASE, MCPWM_CLOCK_DIVIDER_1);
-
     //
     // Freeze the counter
     //
     MCPWM_setTimeBaseCounterMode(PWM1_BASE, MCPWM_COUNTER_MODE_STOP_FREEZE);
 }
-
 //
 // adcA1ISR - ADC A Interrupt 1 ISR
 //
@@ -223,7 +199,6 @@ __interrupt void adcA1ISR(void)
     // Add the latest result to the buffer
     //
     myADC0Results[index++] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER0);
-
     //
     // Set the bufferFull flag if the buffer is full
     //
@@ -232,12 +207,10 @@ __interrupt void adcA1ISR(void)
         index = 0;
         bufferFull = 1;
     }
-
     //
     // Clear the interrupt flag
     //
     ADC_clearInterruptStatus(myADC0_BASE, ADC_INT_NUMBER1);
-
     //
     // Check if overflow has occurred
     //
@@ -246,7 +219,6 @@ __interrupt void adcA1ISR(void)
         ADC_clearInterruptOverflowStatus(myADC0_BASE, ADC_INT_NUMBER1);
         ADC_clearInterruptStatus(myADC0_BASE, ADC_INT_NUMBER1);
     }
-
     //
     // Acknowledge the interrupt
     //

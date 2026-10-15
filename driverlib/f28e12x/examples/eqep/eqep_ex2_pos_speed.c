@@ -102,8 +102,6 @@
 #include "IQmathLib.h"
 #include "eqep_ex2_calculation.h"
 #include "board.h"
-
-
 //
 // Defines
 //
@@ -112,7 +110,6 @@
                                             // (300 rpm)
 #define PRD_VAL   (TB_CLK / (PWM_CLK * 2))  // Calculate value period value
                                             // for up-down count mode
-
 // .9999 / 4000 converted to IQ26 fixed point format
 #define MECH_SCALER     16776
 // 2 pole pairs in this example
@@ -123,14 +120,11 @@
 #define SPEED_SCALER    ((((uint64_t)32 * DEVICE_SYSCLK_FREQ / 64) * 60) / (24000000))
 // Base/max rpm is 6000rpm
 #define BASE_RPM        6000
-
-
 //
 // Function Prototypes
 //
 void initMCPWM(void);
 __interrupt void mcpwmISR(void);
-
 //
 // Globals
 //
@@ -145,7 +139,6 @@ PosSpeed_Object posSpeed =
     BASE_RPM,       // baseRPM
     0, 0, 0, 0      // Initialize outputs to zero
 };
-
 uint16_t interruptCount = 0;
 uint32_t count =0;  // counter to check measurement gets saturated
 uint32_t pass=0, fail =0; // Pass or fail indicator
@@ -158,30 +151,25 @@ void main(void)
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pullups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Board Initialization
     // Setup eQEP1, configuring the unit timer and quadrature capture units
     // Initialize GPIOs for use as EQEP1A, EQEP1B, and EQEP1I
     //
     Board_init();
-
     //
     // Initialize GPIO0 to MCPWM1A, GPIO1 to MCPWM1B, and GPIO4 as an output.
     // They will be used to simulate incoming eQEP Phase A, Phase B, and Index
@@ -189,33 +177,26 @@ void main(void)
     //
     GPIO_setPinConfig(GPIO_0_MCPWM1_1A);
     GPIO_setPadConfig(0, GPIO_PIN_TYPE_STD);
-
     GPIO_setPinConfig(GPIO_1_MCPWM1_1B);
     GPIO_setPadConfig(1, GPIO_PIN_TYPE_STD);
-
-    
     //
     // Interrupts that are used in this example are re-mapped to ISR functions
     // found within this file.
     //
     Interrupt_register(INT_MCPWM1, &mcpwmISR);
-
     //
     // Setup MCPWM1 to generate a 5 kHz signal to be an input to the eQEP
     //
     initMCPWM();
-
     //
     // Enable interrupts required for this example
     //
     Interrupt_enable(INT_MCPWM1);
-
     //
     // Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     //
     // Loop indefinitely
     //
@@ -224,7 +205,6 @@ void main(void)
         ;
     }
 }
-
 //
 // Function to configure MCPWM1 to generate a 5 kHz signal.
 //
@@ -234,7 +214,6 @@ void initMCPWM(void)
     // Disable the MCPWM time base clock before configuring the module
     //
     SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Load Mode configurations
     //
@@ -247,19 +226,16 @@ void initMCPWM(void)
     MCPWM_setCounterCompareShadowLoadMode(PWM1_BASE, MCPWM_COUNTER_COMPARE_1B, MCPWM_COMP_LOAD_FREEZE);
     MCPWM_setActionQualifierShadowLoadMode(PWM1_BASE, MCPWM_ACTION_QUALIFIER_1A, MCPWM_AQ_LOAD_FREEZE);
     MCPWM_setActionQualifierShadowLoadMode(PWM1_BASE, MCPWM_ACTION_QUALIFIER_1B, MCPWM_AQ_LOAD_FREEZE);
-
     //
     // Set phase shift to 0 and clear the time base counter
     //
     MCPWM_setPhaseShift(PWM1_BASE, 0);
     MCPWM_setTimeBaseCounter(PWM1_BASE, 0);
-
     //
     // Set the compare A value to half the period value, compare B to 0
     //
     MCPWM_setCounterCompareActiveValue(PWM1_BASE, MCPWM_COUNTER_COMPARE_1A, PRD_VAL/2);
     MCPWM_setCounterCompareActiveValue(PWM1_BASE, MCPWM_COUNTER_COMPARE_1B, 0);
-
     //
     // Set action qualifier behavior on compare A events
     // - MCPWM1A --> 1 when CTR = CMPA and increasing
@@ -271,7 +247,6 @@ void initMCPWM(void)
         MCPWM_AQ_OUTPUT_LOW_DOWN_CMPA |
         MCPWM_AQ_OUTPUT_NO_CHANGE_UP_CMPB |
         MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPB);
-
     //
     // Set action qualifier behavior on compare B events
     // - MCPWM1B --> 1 when CTR = PRD and increasing
@@ -283,24 +258,20 @@ void initMCPWM(void)
         MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPA | 
         MCPWM_AQ_OUTPUT_NO_CHANGE_UP_CMPB | 
         MCPWM_AQ_OUTPUT_NO_CHANGE_DOWN_CMPB);
-
     //
     // Enable interrupt when the counter is equal to PRD
     //
     MCPWM_setEventTriggerSource(PWM1_BASE, MCPWM_ET_1,
                                 MCPWM_EVT_TBCTR_PERIOD);
     MCPWM_enableInterrupt(PWM1_BASE, MCPWM_INT_ET_1);
-
     //
     // Interrupt on first event
     //
     MCPWM_setEventTriggerEventPrescale(PWM1_BASE, MCPWM_ET_1, 1);
-
     //
     // Set the time base clock prescaler to /1
     //
     MCPWM_setClockPrescaler(PWM1_BASE, MCPWM_CLOCK_DIVIDER_1);
-
     //
     // Set the period value; don't shadow the register
     //
@@ -309,25 +280,21 @@ void initMCPWM(void)
     // Put the time base counter into up-down count mode
     //
     MCPWM_setTimeBaseCounterMode(PWM1_BASE, MCPWM_COUNTER_MODE_UP_DOWN);
-
     //
     // Sync the MCPWM time base clock
     //
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
 }
-
 //
 // MCPWM1 ISR--interrupts once every 4 QCLK counts (one period)
 //
  __interrupt void mcpwmISR(void)
 {
     uint16_t i;
-
     //
     // Position speed and measurement
     //
     PosSpeed_calculate(&posSpeed, &count);
-
     //
     // Comparing the eQEP measured frequency with the MCPWM frequency
     // After count becomes 3 , eQEP measurement gets saturated and if
@@ -343,7 +310,6 @@ void initMCPWM(void)
             fail = 1; pass = 0;
         }
        }
-
     //
     // Control loop for position control and speed control
     //
@@ -360,12 +326,10 @@ void initMCPWM(void)
         }
         GPIO_writePin(2, 0);
     }
-
     //
     // Clear interrupt flag and issue ACK
     //
     MCPWM_clearInterrupt(PWM1_BASE, MCPWM_INT_ET_1);
     MCPWM_clearGlobalInterrupt(PWM1_BASE);
-
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP2);
 }

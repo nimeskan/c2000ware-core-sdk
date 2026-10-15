@@ -80,14 +80,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //#############################################################################
-
 //
 // Included Files
 //
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
 // 
 // a runtime update value for the phase shift value and observations
 // default this value is set to false, and hence the phase shift value 
@@ -96,60 +94,49 @@
 volatile bool gUsePhaseValueUpdate = false;
 volatile uint16_t gPhaseShiftValue = 0;
 volatile bool gPhaseDirUp = true;
-
 //
 // Function Prototypes
 //
 __interrupt void INT_myMCPWM0_ISR(void);
-
 void main(void)
 {
     //
     // Initialize global variables
     //
-
     //
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pull-ups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Disable sync(Freeze clock to PWM as well)
     //
     SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Configure mcpwm1, mcpwm2
     //
     Board_init();
-
     //
     // Enable sync and clock to PWM
     //
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Enable Global Interrupt (INTM) and real time interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     //
     // IDLE loop. Just sit and loop forever (optional):
     //
@@ -158,27 +145,22 @@ void main(void)
         NOP;
     }
 }
-
 //
 // INT_myMCPWM0_ISR - mcpwm0 ISR
 //
 __interrupt void INT_myMCPWM0_ISR(void)
 {   
-
     //
     // In the Expressions, set gUsePhaseValueUpdate variable to true
     // and use gPhaseShiftValue to update the phase shift value and 
     // observe the waveform. 
     //
-    
     if(true == gUsePhaseValueUpdate)
     {
         MCPWM_setPhaseShift(myMCPWM1_BASE, gPhaseShiftValue);
-
         //
         // Optionally update the Counter direction after the syncin event occurs
         //
-
         if(true == gPhaseDirUp)
         {
             MCPWM_setCountModeAfterSync(myMCPWM1_BASE, MCPWM_COUNT_MODE_UP_AFTER_SYNC);
@@ -194,19 +176,15 @@ __interrupt void INT_myMCPWM0_ISR(void)
         // do nothing
         //
     }
-   
     //
     // Clear the interrupt flags. 
     // to clear all flags, MCPWM_INT_SOURCE_ALL may be used as arg.
     //
     MCPWM_clearInterrupt(myMCPWM0_BASE, MCPWM_INT_ET_1);
-
     //
     // Clear the global interrupt flag
     //
     MCPWM_clearGlobalInterrupt(myMCPWM0_BASE);
-
-
     //
     // Acknowledge this interrupt to receive more interrupts from group
     //

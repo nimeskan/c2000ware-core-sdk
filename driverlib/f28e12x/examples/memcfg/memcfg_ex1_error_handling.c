@@ -61,45 +61,37 @@
 //
 #include "device.h"
 #include "driverlib.h"
-
 //
 // Defines
 //
 #define TEST_PASS 0xABCDABCD
 #define TEST_FAIL 0xDEADDEAD
-
 //
 // Globals
 //
 uint16_t errCountGlobal = 0;
 uint32_t testStatusGlobal;
-
 //
 // Globals to capture error type & address in ISR
 //
 volatile uint32_t errorAddress = 0, errorType = 0;
-
 //
 // Global to capture source of memory error
 //
 volatile uint32_t intStatus = 0;
-
 //
 // Flags for uncorrectable interrupts
 //
 volatile uint32_t uncorrErrIntFlg = 0;
-
 //
 // Function Prototypes
 //
 void writeCAFE(uint32_t startAddress, uint32_t endAddress);
 uint32_t generateParityMemUncorrError(void);
-
 //
 // ISRs
 //
 __interrupt void nmiISR(void);
-
 //
 // Main
 //
@@ -107,57 +99,47 @@ void main(void)
 {
     uint16_t errCountLocal = 0;
     testStatusGlobal = TEST_FAIL;
-
     //
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Initialize GPIO and configure the GPIO pin as a push-pull output
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Masking all the other interrupt sources for memcfg test cases.
     // Unmask the other interrupts as per application need.
     //
     SysCtl_setInterruptStatusMask(0x3E2U);
-
     //
     // Enable global Interrupts and higher priority real-time debug events:
     //
     EINT;
     ERTM;
-
     //
     // Register ISR for NMI
     //
     Interrupt_register(INT_NMI, nmiISR);
     SysCtl_enableNMIGlobalInterrupt();
-
     //
     // Parity memory uncorrectable error generation & handling
     //
     errCountLocal = generateParityMemUncorrError();
     errCountGlobal = errCountGlobal + errCountLocal;
-
     if(errCountGlobal == 0x0)
     {
         testStatusGlobal = TEST_PASS;
     }
-
     //
     // Loop indefinitely
     //
@@ -165,7 +147,6 @@ void main(void)
     {
     }
 }
-
 //
 // generateParityMemUncorrError - Generate uncorrectable error in parity memory &
 // demonstrate the interrupt handling in case of uncorr error in parity memories.
@@ -176,28 +157,23 @@ uint32_t generateParityMemUncorrError()
     uint32_t i, memOffset;
     uint32_t readMemData = 0, testPassCnt = 0;
     uint32_t parityRead1 = 0;
-
     //
     // Clear uncorrectable error status.
     //
     MemCfg_clearUncorrErrorStatus(MEMCFG_UCERR_CPUREAD);
-
     //
     // Initialize memories & check if it is getting initialized
     //
     MemCfg_initSections(MEMCFG_SECT_M1);
     while(MemCfg_getInitStatus(MEMCFG_SECT_M1) != 1U);
-
     //
     // Write to M0 RAM - 0x0000-0x03FF
     //
     writeCAFE(M1_RAM_BASE, 0x7FFU);
-
     //
     // Reset the error flag
     //
     uncorrErrIntFlg = 0U;
-
     //
     // Generating 5 uncorrectable errors at some locations in memory
     //
@@ -207,18 +183,15 @@ uint32_t generateParityMemUncorrError()
         // Reset error flag which gets set in ISR
         //
         uncorrErrIntFlg = 0;
-
         //
         // Corrupting some random address
         //
         memOffset = 0x10U + (i * 8U);
-
         //
         // Set the memory in Parity write mode.
         //
         MemCfg_setTestMode(MEMCFG_SECT_M1, MEMCFG_TEST_WRITE_PARITY);
         parityRead1 = HWREGH(M1_RAM_BASE + memOffset);
-
         //
         // Set the memory in Data write mode & flip 1 bit in data to generate
         // uncorrectable error. Writing the data to memory in test mode
@@ -227,7 +200,6 @@ uint32_t generateParityMemUncorrError()
         MemCfg_setTestMode(MEMCFG_SECT_M1, MEMCFG_TEST_WRITE_DATA);
         HWREGH(M1_RAM_BASE + memOffset) = HWREGH(M1_RAM_BASE + memOffset) ^
                                            0x01;
-
         //
         // Go to functional mode and try to read data from memory to generate
         // uncorrectable error as 1 bits of data were flipped in data write
@@ -235,9 +207,7 @@ uint32_t generateParityMemUncorrError()
         //
         MemCfg_setTestMode(MEMCFG_SECT_M1, MEMCFG_TEST_FUNCTIONAL);
         readMemData = HWREGH(M1_RAM_BASE + memOffset);
-
         while(uncorrErrIntFlg == 0);
-
         //
         // Check whether uncorrectable error is getting generated at the
         // correct address or not.
@@ -248,7 +218,6 @@ uint32_t generateParityMemUncorrError()
         {
             testPassCnt++;
         }
-
         //
         // Write the correct data in memory. Application can choose to re-write the
         // whole memory region to avoid any possible data corruption using following:
@@ -256,7 +225,6 @@ uint32_t generateParityMemUncorrError()
         //
         HWREGH(errorAddress) = 0xCAFE;
     }
-
     //
     // Return status
     //
@@ -269,7 +237,6 @@ uint32_t generateParityMemUncorrError()
         return 1;
     }
 }
-
 __interrupt void nmiISR(void)
 {
     //
@@ -282,25 +249,21 @@ __interrupt void nmiISR(void)
         // capture error address
         //
         errorAddress = MemCfg_getUncorrErrorAddress(MEMCFG_UCERR_CPUREAD);
-
         //
         // Clear the flag at peripheral level
         //
         MemCfg_clearUncorrErrorStatus(MEMCFG_UCERR_CPUREAD);
     }
-
     //
     // Clear NMI flags
     //
     intStatus = SysCtl_getNMIFlagStatus();
     SysCtl_clearNMIStatus(intStatus);
-
     //
     // Set the flag
     //
     uncorrErrIntFlg = 1U;
 }
-
 void writeCAFE(uint32_t startAddress, uint32_t endAddress)
 {
     uint16_t* addr;
@@ -309,7 +272,6 @@ void writeCAFE(uint32_t startAddress, uint32_t endAddress)
         *addr = 0xCAFE;
     }
 }
-
 //
 // End of File
 //

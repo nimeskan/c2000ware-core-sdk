@@ -88,9 +88,7 @@
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
 #define MCPWM_TIMER_TBPRD    20000UL
-
 //
 // Defines
 //
@@ -98,11 +96,9 @@
 #define BURST_MCPWM_2CH         1              // 1 words per transfer
 #define TRANSFER                4              // 4 transfers (different configs)
 #define MCPWM_PERIOD            5000U           
-
 //
 // Globals
 //
-
 uint16_t compareConfigs_6ch[TRANSFER*BURST_MCPWM_6CH] = {
 //  CMP_1A, CMP_2A,  CMP_3A,
     500U,   1000U,   1500U, 
@@ -110,7 +106,6 @@ uint16_t compareConfigs_6ch[TRANSFER*BURST_MCPWM_6CH] = {
     1500U,  2000U,   2500U, 
     2000U,  2500U,   3000U, 
 };
-
 uint16_t compareConfigs_2ch[TRANSFER*BURST_MCPWM_2CH] = {
 //  CMP_1A,,
     500U,  
@@ -118,21 +113,17 @@ uint16_t compareConfigs_2ch[TRANSFER*BURST_MCPWM_2CH] = {
     1500U, 
     2000U, 
 };
-
 // Place buffers in GSRAM
 #pragma DATA_SECTION(compareConfigs_6ch,    "ramgs0");
 #pragma DATA_SECTION(compareConfigs_2ch,    "ramgs0");
-
 //
 // Function Prototypes
 //
 void initDMA(void);
 void initMCPWM(uint32_t base);
-
 __interrupt void dmaCh1ISR(void);
 __interrupt void dmaCh2ISR(void);
 __interrupt void MCPWM1ISR(void);
-
 //
 // Main
 //
@@ -142,29 +133,24 @@ void main(void)
     // Initialize device clock and peripherals
     //
     Device_init();
-
     //
     // Disable pin locks and enable internal pull ups.
     //
     Device_initGPIO();
-
     //
     // Initialize PIE and clear PIE registers. Disables CPU interrupts.
     //
     Interrupt_initModule();
-
     //
     // Initialize the PIE vector table with pointers to the shell Interrupt
     // Service Routines (ISR).
     //
     Interrupt_initVectorTable();
-
     //
     // Assign the interrupt service routines to MCPWM interrupts
     //
     Interrupt_register(INT_DMA_CH1, &dmaCh1ISR);
     Interrupt_register(INT_DMA_CH2, &dmaCh2ISR);
-
     //
     // Disable sync(Freeze clock to PWM as well). GTBCLKSYNC is applicable
     // only for multiple core devices. Uncomment the below statement if
@@ -172,45 +158,35 @@ void main(void)
     //
     // SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_GTBCLKSYNC);
     SysCtl_disablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // Configure MCPWM and Input X-BAR Pins
     //
     Board_init();
     initDMA();
-
     //
     // Enable sync and clock to PWM
     //
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
     //
     // init the DMA interrupts
     //
     Interrupt_enable(INT_DMA_CH1);
     Interrupt_enable(INT_DMA_CH2);
-
     //
     // Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
     //
     EINT;
     ERTM;
-
     EALLOW;
     DMA_startChannel(DMA_CH1_BASE);
     DMA_startChannel(DMA_CH2_BASE);
-
     //
     // IDLE loop. Just sit and loop forever (optional):
     //
-
     for(;;)
     {
-
     }
 }
-
-
 //
 // DMA setup channels.
 //
@@ -220,31 +196,26 @@ void initDMA()
     // Initialize DMA
     //
     DMA_initController();
-
     //
     // DMA CH1
     //
     DMA_configAddresses(DMA_CH1_BASE, (uint16_t *)(myMCPWM0_BASE + MCPWM_O_PWM1_CMPAS), compareConfigs_6ch);
-    
     //
     // The CMPAS registers are separated by 50 words in the MCPWM memory map.
     //
     uint16_t cmp_step_16_bit = (MCPWM_O_PWM2_CMPAS - MCPWM_O_PWM1_CMPAS); 
-
     DMA_configBurst(DMA_CH1_BASE, BURST_MCPWM_6CH, 1, cmp_step_16_bit);
     //
     //
     DMA_configTransfer(DMA_CH1_BASE, TRANSFER, 1, (int16_t) ((1-BURST_MCPWM_6CH)*cmp_step_16_bit));
     DMA_configMode(DMA_CH1_BASE, DMA_TRIGGER_MCPWM1SOCA, DMA_CFG_ONESHOT_DISABLE |
                    DMA_CFG_CONTINUOUS_ENABLE | DMA_CFG_SIZE_16BIT);
-
     //
     // Configure DMA Ch1 interrupts
     //
     DMA_setInterruptMode(DMA_CH1_BASE, DMA_INT_AT_END);
     DMA_enableInterrupt(DMA_CH1_BASE);
     DMA_enableTrigger(DMA_CH1_BASE);
-
     //
     // DMA CH2
     //
@@ -254,7 +225,6 @@ void initDMA()
     DMA_configTransfer(DMA_CH2_BASE, TRANSFER, 1, 1-BURST_MCPWM_2CH);
     DMA_configMode(DMA_CH2_BASE, DMA_TRIGGER_MCPWM3SOCA, DMA_CFG_ONESHOT_DISABLE |
                    DMA_CFG_CONTINUOUS_ENABLE | DMA_CFG_SIZE_16BIT);
-
     //
     // Configure DMA Ch2 interrupts
     //
@@ -262,23 +232,19 @@ void initDMA()
     DMA_enableInterrupt(DMA_CH2_BASE);
     DMA_enableTrigger(DMA_CH2_BASE);
 }
-
 //
 // DMA Channel 1 ISR
 //
 __interrupt void dmaCh1ISR(void)
 {
-
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP7);
     return;
 }
-
 //
 // DMA Channel 6 ISR
 //
 __interrupt void dmaCh2ISR(void)
 {
-
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP7);
     return;
 }

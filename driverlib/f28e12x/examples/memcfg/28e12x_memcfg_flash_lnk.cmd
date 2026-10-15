@@ -5,16 +5,11 @@ MEMORY
    BOOT_RSVD        : origin = 0x000002, length = 0x000126     /* Part of M0, BOOT rom will use this for stack */
    RAMM0            : origin = 0x000128, length = 0x0002D8
    RAMM1            : origin = 0x000400, length = 0x000400
-   
    RAMGS0           : origin = 0x00C000, length = 0x001800
-
    /* Flash Banks */
    FLASH_BANK0_SEC_0_63      : origin = 0x080002, length = 0xFFFE
-
    RESET            : origin = 0x3FFFC0, length = 0x000002
 }
-
-
 SECTIONS
 {
    codestart        : > BEGIN
@@ -22,7 +17,6 @@ SECTIONS
    .cinit           : > FLASH_BANK0_SEC_0_63, ALIGN(8)
    .switch          : > FLASH_BANK0_SEC_0_63, ALIGN(8)
    .reset           : > RESET, TYPE = DSECT /* not used, */
-
    .stack           : > RAMM0
 #if defined(__TI_EABI__)
    .bss             : > RAMGS0
@@ -37,9 +31,7 @@ SECTIONS
    .econst          : > FLASH_BANK0_SEC_0_63, ALIGN(8)
    .esysmem         : > RAMGS0
 #endif
-
    ramgs0 : >> RAMGS0
-
    #if defined(__TI_EABI__)
        .TI.ramfunc : {} LOAD = FLASH_BANK0_SEC_0_63,
                         RUN = RAMGS0,
@@ -61,9 +53,7 @@ SECTIONS
                         RUN_END(_RamfuncsRunEnd),
                         ALIGN(8)
    #endif
-
 }
-
 /*
 //===========================================================================
 // End of file.

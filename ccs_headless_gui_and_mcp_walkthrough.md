@@ -12,6 +12,21 @@ It assumes CCS 21 is already installed per `get_started_userguide.md`
 (install path `/root/ti/ccs2100/ccs`). Everything below is additional —
 none of it is required for the CLI-only workflow in that guide.
 
+
+> **Correction (read this first).** This document concluded that CCS's GUI
+> cannot be driven through a browser-automation port and that only `xdotool`
+> clicks at pixel positions work (sections 4 and 5). That is wrong. CCS 21 is
+> Theia on Electron, so it can be started with Chromium's debug port,
+> `ccstudio --remote-debugging-port=9444 --remote-allow-origins='*'`, and
+> Playwright can attach to its own window with
+> `chromium.connectOverCDP('http://127.0.0.1:9444')`. Buttons, dialogs, the
+> command palette and the Explorer are then found by role, text or selector,
+> with no dependence on screen size. What failed in section 4 was opening CCS's
+> internal HTTP address in a *separate* browser, which lacks Electron's preload
+> bridge. A working driver, the recording setup and a full write-up are in
+> `data_workspace_c2000/fsi_rtlog/test/demos/ccs/README.md`. Sections 3, 6 and 7
+> (launching, enabling the MCP servers, verifying them) are still accurate.
+
 ---
 
 ## 1. Why this was necessary
@@ -141,7 +156,7 @@ Theia app listening on http://127.0.0.1:<port>.
 
 ---
 
-## 4. Getting visuals: why Playwright was the wrong tool, and what worked instead
+## 4. Getting visuals: why Playwright on the HTTP port failed, and the first approach that worked
 
 ### 4.1 The instinct: point Playwright at the HTTP port
 
@@ -194,9 +209,10 @@ own startup code throws immediately trying to read a property off
 
 In short: **the HTTP port serves the same assets Electron's window loads,
 but only Electron's own window has the context needed to actually run
-them.** Playwright was the wrong layer entirely for seeing or driving the
-real UI — it's useful here only as a coincidental way to confirm the HTTP
-server responds, not as a way to render the app.
+them.** Pointing a *separate* Playwright browser at it was the wrong layer
+for seeing or driving the real UI. (Attaching to Electron's own renderer
+through `--remote-debugging-port` is different and does work, see the
+correction at the top.)
 
 ### 4.3 What actually worked: screenshot the real X display, not a browser tab
 
@@ -263,8 +279,10 @@ large application window.
 
 With a correctly sized, visible window, interaction was done purely by
 sending synthetic input to absolute screen coordinates read off each
-screenshot — there is no accessibility-tree/DOM-based automation here,
-just "click at pixel (x, y)":
+screenshot. This was the first approach that worked, and it is still
+useful for one-off poking, but DOM-based automation over the debug port
+(see the correction at the top) is more robust: it does not depend on
+screen size. The pixel method:
 
 ```bash
 export DISPLAY=:99
